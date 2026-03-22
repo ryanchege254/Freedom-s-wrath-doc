@@ -1,0 +1,387 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .root { padding: 1rem 0; }
+  .header { margin-bottom: 1.5rem; }
+  .game-title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); letter-spacing: 0.04em; }
+  .game-sub { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; }
+  .acts-nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .act-btn { padding: 6px 14px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); font-size: 13px; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); transition: all 0.15s; }
+  .act-btn:hover { background: var(--color-background-secondary); color: var(--color-text-primary); }
+  .act-btn.active { background: #3C3489; color: #EEEDFE; border-color: #3C3489; }
+  .act-section { margin-bottom: 1.5rem; }
+  .act-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .level-card { border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); margin-bottom: 8px; overflow: hidden; background: var(--color-background-primary); }
+  .level-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+  .level-header:hover { background: var(--color-background-secondary); }
+  .level-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .level-title-wrap { flex: 1; }
+  .level-name { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+  .level-location { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
+  .level-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag { font-size: 11px; padding: 2px 8px; border-radius: 20px; }
+  .tag-mechanic { background: #E1F5EE; color: #085041; }
+  .tag-boss { background: #FAECE7; color: #993C1D; }
+  .tag-stealth { background: #F1EFE8; color: #5F5E5A; }
+  .tag-story { background: #EEEDFE; color: #3C3489; }
+  .expand-icon { font-size: 16px; color: var(--color-text-tertiary); transition: transform 0.2s; }
+  .level-body { padding: 0 16px 16px; display: none; }
+  .level-body.open { display: block; }
+  .section-block { margin-top: 12px; }
+  .section-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+  .section-text { font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; }
+  .feature-pill { display: inline-block; padding: 4px 10px; border-radius: var(--border-radius-md); font-size: 12px; margin-top: 6px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+  .divider { height: 0.5px; background: var(--color-border-tertiary); margin: 10px 0; }
+  .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 1rem; align-items: center; }
+  .filter-label { font-size: 12px; color: var(--color-text-tertiary); }
+  .filter-btn { padding: 4px 12px; border: 0.5px solid var(--color-border-secondary); border-radius: 20px; font-size: 12px; cursor: pointer; background: var(--color-background-primary); color: var(--color-text-secondary); }
+  .filter-btn.active { background: #F5C4B3; color: #993C1D; border-color: #993C1D; }
+  .progress-bar { height: 4px; border-radius: 2px; background: var(--color-background-secondary); margin-bottom: 1.5rem; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 2px; background: #534AB7; width: 0%; transition: width 0.4s; }
+  .progress-label { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 6px; }
+  .chevron { display: inline-block; transition: transform 0.2s; }
+  .chevron.open { transform: rotate(90deg); }
+</style>
+
+<div class="root">
+  <div class="header">
+    <div class="game-title">Freedom's Wrath — Level Design Guide</div>
+    <div class="game-sub">20 levels · 4 acts · Protagonist: Amari Juma, Nandi warrior</div>
+  </div>
+
+  <div class="progress-label" id="prog-label">0 of 20 levels explored</div>
+  <div class="progress-bar"><div class="progress-fill" id="prog-fill"></div></div>
+
+  <div class="acts-nav">
+    <button class="act-btn active" onclick="filterAct('all')">All levels</button>
+    <button class="act-btn" onclick="filterAct(1)">Act I — The Awakening</button>
+    <button class="act-btn" onclick="filterAct(2)">Act II — The Gathering</button>
+    <button class="act-btn" onclick="filterAct(3)">Act III — The Siege</button>
+    <button class="act-btn" onclick="filterAct(4)">Act IV — Freedom's Wrath</button>
+  </div>
+
+  <div id="levels-container"></div>
+</div>
+
+<script>
+const LEVELS = [
+  {
+    num: 1, act: 1,
+    name: "The Burning Nandi Hills",
+    location: "Nandi Hills, Western Kenya",
+    tags: ["tutorial", "story"],
+    color: "#534AB7", textColor: "#EEEDFE",
+    folklore: "Based on the Nandi Resistance of 1895–1905. Koitalel arap Samoei was the Nandi Orkoiyot (spiritual prophet-warrior) who led his people against British colonialism. The Nandi were the last Kenyan community to be militarily subdued.",
+    story: "Young warrior Amari Juma returns home to find his village ablaze. Colonial forces led by the Iron Governor have raided the Nandi Hills, capturing Koitalel arap Samoei. Before being taken, Koitalel presses a sacred amulet into Amari's hands and whispers a prophecy: 'Cross the land. Gather the children of the soil. Return with their wrath.'",
+    mechanic: "Tutorial level. Players learn movement, spear throw, and melee through burning village obstacles. Fire zones force players to learn dodge mechanics naturally — teaching through environment rather than text prompts.",
+    design: "Onboarding through narrative investment (inspired by The Last of Us). Players learn every control because they're emotionally compelled to, not instructed to. Burning village creates urgency without artificial time limits.",
+    tagLabels: [{ t: "Tutorial", c: "tag-story" }, { t: "Stealth intro", c: "tag-stealth" }]
+  },
+  {
+    num: 2, act: 1,
+    name: "Koitalel's Prophecy",
+    location: "Nandi Sacred Grove",
+    tags: ["story", "power intro"],
+    color: "#534AB7", textColor: "#EEEDFE",
+    folklore: "Koitalel arap Samoei prophesied that a 'beast that moves without legs on an iron road' would bring ruin to Kenya — widely interpreted as the Uganda Railway. He refused to meet British officers and was killed at a peace meeting on October 19, 1905.",
+    story: "Amari reaches the sacred grove where Nandi elders perform a last ritual. The amulet glows, granting Amari 'Spirit Sight' — the ability to perceive enemies through walls as amber outlines. His first obstacle: a colonial scout patrol guarding the grove's exit.",
+    mechanic: "Introduction of Spirit Sight ability (activated by holding the special button). Scouts use patrol routes — Spirit Sight reveals their paths. Players learn that powers have tactical, not just combat, uses.",
+    design: "Early power introduction creates a 'toy' moment (Nintendo's design principle). Giving players a signature ability in level 2 establishes identity and gives them something to experiment with before difficulty spikes.",
+    tagLabels: [{ t: "Power unlock", c: "tag-mechanic" }, { t: "Stealth", c: "tag-stealth" }]
+  },
+  {
+    num: 3, act: 1,
+    name: "The Rift Valley Run",
+    location: "Great Rift Valley Escarpment",
+    tags: ["chase", "terrain"],
+    color: "#534AB7", textColor: "#EEEDFE",
+    folklore: "The Maasai Il-Moran (warrior class) controlled the Rift Valley for generations. They were the most feared warriors in East Africa — British commanders noted that Maasai warriors considered death in battle honorable but surrender shameful.",
+    story: "Fleeing toward Maasai territory, Amari is pursued by colonial cavalry across the Rift Valley escarpment. He must use the dramatic vertical terrain — cliffs, ravines, and lava rocks — to outmaneuver horses that cannot follow on foot.",
+    mechanic: "Vertical platforming focus. Cavalry cannot climb terrain; Amari must stay elevated. Introduction of wall-jump and ledge-grab. Players learn that terrain is a weapon, not just a backdrop.",
+    design: "Vertical level design creates emergent gameplay moments (Donkey Kong Country / Celeste influence). The natural limitation of horses on cliffs teaches resource-based thinking without tutorials.",
+    tagLabels: [{ t: "Chase sequence", c: "tag-story" }, { t: "Vertical terrain", c: "tag-mechanic" }]
+  },
+  {
+    num: 4, act: 1,
+    name: "The Moran's Trial",
+    location: "Maasai Plains",
+    tags: ["boss", "alliance"],
+    color: "#534AB7", textColor: "#EEEDFE",
+    folklore: "The Maasai Emuratare — a rite of passage where young Moran warriors hunt and kill a lion with only a spear to prove they are worthy of the warrior rank. Ole Lenana and Ole Batian were rival Maasai laibons (spiritual leaders) at the time of colonial contact.",
+    story: "Maasai elder Ole Lenana agrees to ally with Amari — but only if he passes the Moran's Trial: face Simba Mkubwa, a legendary lion with an unnaturally dark mane. Defeating the lion earns Amari the Rungu (throwing club) and Maasai shield. The Maasai join his growing resistance.",
+    mechanic: "First boss battle. Simba Mkubwa has three attack patterns (charge, swipe, roar-stun). Players must use all learned mechanics: dodge, spear range, and new Rungu boomerang throw. Victory unlocks shield-block ability.",
+    design: "Boss as skill check (Nintendo/FromSoftware principle). The lion fight forces mastery of all mechanics learned in levels 1–3. Earning an ally as a reward creates narrative stakes around winning — not just survival.",
+    tagLabels: [{ t: "Boss fight", c: "tag-boss" }, { t: "New weapons", c: "tag-mechanic" }]
+  },
+  {
+    num: 5, act: 1,
+    name: "Lwanda Magere's Shadow",
+    location: "Lake Victoria shores, Luo Territory",
+    tags: ["shadow mechanic", "folklore"],
+    color: "#534AB7", textColor: "#EEEDFE",
+    folklore: "Lwanda Magere is the most celebrated warrior in Luo folklore. His skin was made of stone — swords and spears could not wound him. He was eventually killed only when an enemy wife discovered that his shadow was his only vulnerable point and stabbed it during battle. He remains a symbol of both invincibility and the danger of trusting enemies.",
+    story: "Luo elders tell Amari the legend of Lwanda Magere and teach him to fight through shadows. Amari trains along the lake at night, learning to use his own shadow as a trap and to read enemies through the shadows they cast.",
+    mechanic: "Shadow system introduced. Amari can project his shadow as a decoy that enemies will attack, stepping aside while they are occupied. Enemy shadows telegraph attack direction before the strike lands — giving players a visual cue to dodge.",
+    design: "Mechanic derived directly from narrative lore creates a 'show, don't tell' moment. Players who know the legend feel rewarded. Players who don't learn the legend through play — and discover it feels deeply grounded.",
+    tagLabels: [{ t: "Shadow mechanic", c: "tag-mechanic" }, { t: "Luo folklore", c: "tag-story" }]
+  },
+  {
+    num: 6, act: 2,
+    name: "The Kamba Archer's Pass",
+    location: "Ukambani Highlands, Eastern Kenya",
+    tags: ["ranged combat", "precision"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "The Akamba (Kamba people) were East Africa's most renowned long-distance traders and warriors. Their archery was legendary — Kamba archers could shoot accurately at 80 metres. They also crafted intricate bows with animal sinew strings and iron-tipped arrows.",
+    story: "Amari must cross a narrow mountain pass heavily guarded by colonial checkpoint soldiers. Kamba archer Mutua and his kin agree to guide him — but only Amari can take the lead since Kamba arrows won't suffice against the soldiers' armour. They teach him their bow before they begin.",
+    mechanic: "Bow and arrow mechanics introduced. Wind-affected trajectory system — a subtle wind indicator on-screen helps players lead shots. Long-range sniping of torches, chains, and ropes creates environmental puzzle opportunities before combat.",
+    design: "Adding a ranged layer expands combat vocabulary at the midpoint of Act II (Horizon Zero Dawn's weapon variety principle). Wind mechanics add realism without frustration — the visual cue keeps it learnable.",
+    tagLabels: [{ t: "Ranged combat", c: "tag-mechanic" }, { t: "Puzzle elements", c: "tag-story" }]
+  },
+  {
+    num: 7, act: 2,
+    name: "Mekatilili's Road",
+    location: "Giriama Coastal Territory",
+    tags: ["stealth", "disguise"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "Mekatilili wa Menza was a Giriama (Mijikenda) elder woman who organised massive resistance against British forced labour in 1913. She traveled village-to-village, dancing the gonja and urging warriors to resist. She was captured and exiled to western Kenya but escaped and walked hundreds of miles back to the coast barefoot.",
+    story: "Mekatilili's followers smuggle Amari toward Mombasa in a colonial officer's uniform taken from an ambush. He must pass through three colonial checkpoints without drawing suspicion, while her women-led network create diversions at just the right moments.",
+    mechanic: "First full stealth level. Disguise mechanic — wrong weapon visible or running triggers suspicion meter. Mekatilili's allies trigger diversions (fire, cattle stampede, singing processions) that Amari can activate by proximity. Multiple valid routes.",
+    design: "Stealth as pacing contrast after sustained combat (Metal Gear Solid design theory). Player agency is preserved by giving multiple valid routes. Mekatilili's network rewards observation and planning over brute force.",
+    tagLabels: [{ t: "Full stealth", c: "tag-stealth" }, { t: "Ally network", c: "tag-mechanic" }]
+  },
+  {
+    num: 8, act: 2,
+    name: "The Mangrove Ambush",
+    location: "Kilifi Creek, Coastal Mangroves",
+    tags: ["water", "environment"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "Swahili coastal warriors used dhow sailing and knowledge of tidal systems to raid and defend stretches of coast. The mangrove forests were considered sacred by coastal communities — spirits of ancestors were believed to inhabit their roots.",
+    story: "A colonial naval patrol blocks the final sea road to Mombasa. Amari must move through tidal mangrove channels at low tide, ambushing the patrol from the water. Crocodiles in the deep channels force him to stay in the shallows.",
+    mechanic: "Underwater and wade mechanics. Visibility limited in murky water. Crocodiles patrol deep zones — Amari must time crossings. Tidal rise is an environmental timer: deeper water spawns more crocodiles and floods shortcuts.",
+    design: "Environmental hazard as organic level gating (Ori and the Blind Forest principle). The crocodile threat creates risk-reward decisions at every deep crossing without needing text prompts. Tidal timer adds escalating pressure.",
+    tagLabels: [{ t: "Water level", c: "tag-mechanic" }, { t: "Tidal timer", c: "tag-story" }]
+  },
+  {
+    num: 9, act: 2,
+    name: "Samburu: The Butterfly Warriors",
+    location: "Samburu Plateau, Northern Rift",
+    tags: ["speed", "agility"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "The Samburu people (related to Maasai) are called 'the Butterfly Warriors' for their speed and agility in battle. Their warriors are known to dance into battle, leaping and spinning. Colonial-era records describe Samburu warriors outrunning horses over short distances.",
+    story: "Drought has made colonial forces desperate and aggressive across the Samburu plateau. A company of soldiers with tracking dogs pursues Amari across open terrain. Samburu warrior Lekuta teaches Amari the art of running in broken patterns that confuse both dogs and gunfire.",
+    mechanic: "Sprint dash ability unlocked — short-burst speed that breaks enemy aim-lock. Time-trial sequences across the plateau. Weaving through acacia trees and boulders at speed. Dogs have different detection (sound-based) than soldiers.",
+    design: "Speed mechanics create kinesthetic joy — the feeling of being fast rewards skilled players without requiring combat wins (Sonic design philosophy). Dog detection forces players to learn a new variable, increasing encounter diversity.",
+    tagLabels: [{ t: "Speed dash", c: "tag-mechanic" }, { t: "Chase design", c: "tag-story" }]
+  },
+  {
+    num: 10, act: 2,
+    name: "The Meru Forest Shrine",
+    location: "Mount Kenya Foothills",
+    tags: ["mid-boss", "nature summon"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "Mount Kenya (Kirinyaga — 'mountain of brightness') is sacred to both Kikuyu and Meru people, believed to be the home of Ngai (God). The Meru Njuri Ncheke council of elders held spiritual authority and conducted rituals at forest shrines on the mountain's slopes.",
+    story: "Colonial forces have desecrated the Meru forest shrine, taking sacred artefacts. Amari must recover them and complete the ritual — but Colonel Hartley and his artillery unit stand guard. To win, Amari calls on the shrine's nature spirits for the first time.",
+    mechanic: "Mid-game boss. Colonel Hartley uses a portable cannon — Amari cannot absorb this damage. Nature Summon ability unlocked: call a buffalo, eagle, or python spirit for different effects. Boss has 3 phases and requires at least two different summons to defeat.",
+    design: "Mid-point power spike rewards players for progress and reinvigorates gameplay (God of War pacing design). Three-phase boss communicates that the game is escalating. Introducing summons here gives them a second half of the game to master.",
+    tagLabels: [{ t: "Mid-game boss", c: "tag-boss" }, { t: "Nature summons", c: "tag-mechanic" }]
+  },
+  {
+    num: 11, act: 2,
+    name: "Mumbi's Children",
+    location: "Kikuyu Highlands, Aberdares",
+    tags: ["moral choice", "story"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "The Kikuyu trace their origin to Mumbi and her husband Gikuyu. Their nine daughters became the nine clans of the Kikuyu. Waiyaki wa Hinga was a Kikuyu chief who attempted peaceful negotiation with the British but was betrayed, bound, and buried alive in Kibwezi in 1892.",
+    story: "The Kikuyu council is divided — some urge negotiation, others full resistance, haunted by Waiyaki's fate. Amari must earn their trust by navigating a colonial ambush of a Kikuyu village. But a colonial soldier is revealed to be a young conscript from another tribe, not a volunteer.",
+    mechanic: "Moral choice system introduced — spare or subdue enemies in key encounters. Kikuyu-specific traps deployed as weapons: bee-hive arrows that disorient, sap-snares, honey-pits. Choices affect which Kikuyu warriors join the final assault.",
+    design: "Consequence systems increase emotional investment (Mass Effect / Disco Elysium design). Bee-hive mechanics are culturally authentic and create comedic but effective combat variety that feels distinctly Kenyan.",
+    tagLabels: [{ t: "Moral choices", c: "tag-story" }, { t: "Trap weapons", c: "tag-mechanic" }]
+  },
+  {
+    num: 12, act: 2,
+    name: "The Aberdare Fog",
+    location: "Aberdare Forest, Deep Interior",
+    tags: ["fog of war", "horror tone"],
+    color: "#0F6E56", textColor: "#E1F5EE",
+    folklore: "The Aberdare forest is home to many creatures in Kikuyu lore, including Irimũ (forest ogres) and spirits of ancestors who did not receive proper burial rites. The forest was so dense that colonial forces rarely ventured deep, describing it as 'impenetrable and haunted.'",
+    story: "A colonial hunting party pursues Amari through fog-dense Aberdare forest. Visibility is near-zero. The forest is alive — ancient spirits unsettle the soldiers more than Amari. He can call a leopard and buffalo spirit to create distractions without direct combat.",
+    mechanic: "Fog of war visibility system — sight range severely limited. Sound-based detection replaces visual detection for both Amari and enemies. Animal summons used for distraction, not combat, in this level. Sprint creates noise; walking is near-silent.",
+    design: "Sensory deprivation creates tension without action (Alien: Isolation design approach). The player's natural instinct to rush is punished — slowing down and listening is the skill being taught. A calmer level before the Act III assault.",
+    tagLabels: [{ t: "Fog of war", c: "tag-stealth" }, { t: "Sound mechanics", c: "tag-mechanic" }]
+  },
+  {
+    num: 13, act: 3,
+    name: "The Iron Horse",
+    location: "Uganda Railway Construction Site, Tsavo",
+    tags: ["destruction", "allies"],
+    color: "#993C1D", textColor: "#FAECE7",
+    folklore: "The Uganda Railway (1896–1901), called the 'Lunatic Express' by critics, used over 32,000 imported Indian labourers and thousands of Kenyan workers under brutal conditions. Workers who resisted were imprisoned or killed. It is considered one of colonialism's most coercive projects in East Africa.",
+    story: "A colonial railway camp uses captured community members as forced labourers. Amari must free workers while sabotaging the railway — destroying bridges, derailing supply carts, and disabling the steam crane — before the morning shift captain sounds the alarm.",
+    mechanic: "Environmental destruction as gameplay. Steam engines explode when shot — chain explosions. Freed workers join as temporary NPC allies who can distract guards, carry heavy objects, or reveal hidden paths. Silent takedown mechanic introduced here.",
+    design: "Ally mechanics shift tactical options and create emergent moments (Pikmin / The Last of Us). Players feel the weight of the story's stakes when protecting NPCs. Environmental destruction creates 'power fantasy through consequence.'",
+    tagLabels: [{ t: "Destruction", c: "tag-mechanic" }, { t: "NPC allies", c: "tag-story" }]
+  },
+  {
+    num: 14, act: 3,
+    name: "The Ghost and the Darkness",
+    location: "Tsavo River, Night",
+    tags: ["night level", "lion spirits"],
+    color: "#993C1D", textColor: "#FAECE7",
+    folklore: "The Tsavo Man-Eaters (1898) were two large, maneless male lions that killed between 35 and 135 railway workers over nine months. In Swahili and Kamba folklore, they were believed to be Shaitani (malevolent spirits) or the angry souls of warriors killed during railway construction.",
+    story: "A colonial supply convoy moves through Tsavo at night. The ghost lions are real — and they've chosen tonight to hunt. Colonial soldiers are terrified and disorganised. Amari can earn the lions' trust by feeding them from supply stores rather than fighting them — turning them into reluctant spirit-allies.",
+    mechanic: "Night level with lantern-based enemy vision cones. Twin lion spirits can be temporarily 'directed' by tossing meat toward target enemies. Players who spent time on stealth levels can complete this without combat. Pure combat route is much harder.",
+    design: "Multiple valid approaches to the same level reward different playstyles (Dishonored/Deus Ex design). The lion allegiance mechanic is emotionally satisfying and culturally respectful — they're feared but not villains.",
+    tagLabels: [{ t: "Night level", c: "tag-stealth" }, { t: "Spirit allies", c: "tag-mechanic" }]
+  },
+  {
+    num: 15, act: 3,
+    name: "Fort Mombasa's Gate",
+    location: "Mombasa Island Approach",
+    tags: ["army assault", "scale"],
+    color: "#993C1D", textColor: "#FAECE7",
+    folklore: "Fort Jesus was built by the Portuguese in 1593 and has been held by the Omanis, Swahili sultans, and the British. It overlooked the Old Port and was used as a prison by the British colonial administration. It is a UNESCO World Heritage Site today.",
+    story: "All of Amari's gathered allies converge — Maasai Il-Moran, Kamba archers, Kikuyu fighters, Luo spearmen — for the first full assault on Fort Jesus. Amari directs different units as the vanguard while fighting his way to the gate.",
+    mechanic: "Large-scale battle — largest number of simultaneous enemies so far. Amari can direct ally units (tap to signal Kamba archers, long press to signal Maasai charge). Cannon emplacements are priority targets. Gate must be destroyed by summoning buffalo spirits.",
+    design: "Scale escalation creates epic feel before the final act (Halo's large combat zones principle). Strategic layer through ally direction adds depth without overwhelming the core combat. The visual spectacle rewards players for alliances built across levels 4–12.",
+    tagLabels: [{ t: "Epic scale", c: "tag-boss" }, { t: "Strategy layer", c: "tag-mechanic" }]
+  },
+  {
+    num: 16, act: 3,
+    name: "Inside Fort Jesus",
+    location: "Fort Jesus Interior, Mombasa",
+    tags: ["prison break", "hybrid"],
+    color: "#993C1D", textColor: "#FAECE7",
+    folklore: "Fort Jesus dungeons held enslaved people and African political prisoners throughout its history. The British used it as a reformatory and prison. The cells beneath the sea-facing wall were known to flood during storm tides.",
+    story: "Inside the fort, Amari must navigate the prison section to free captured elders — including representatives of each community he allied with. Elite Zouave guard units (North African mercenaries hired by the British) patrol the prison. Each rescued elder restores a fraction of Amari's power.",
+    mechanic: "Stealth-and-combat hybrid. Zouave guards have new attack combos — toughest regular enemies so far. Cell keys are held by captains rather than stored in obvious locations. Rescued elders restore different aspects of power (health, stammon, speed).",
+    design: "Objective variety within a confined space creates tactical richness (Splinter Cell design). The elder-as-power-restore mechanic gives players a tangible, narrative-tied incentive to find every prisoner — not just a collectible.",
+    tagLabels: [{ t: "Prison break", c: "tag-stealth" }, { t: "Combat hybrid", c: "tag-mechanic" }]
+  },
+  {
+    num: 17, act: 3,
+    name: "The Traitor's Knife",
+    location: "Fort Jesus Upper Levels",
+    tags: ["betrayal", "debuff"],
+    color: "#993C1D", textColor: "#FAECE7",
+    folklore: "The Askari (from Arabic: 'soldier') were locally-recruited African soldiers who served colonial armies across East Africa. They represented a complex moral reality — men who fought for the colonial system against their own communities, often out of necessity or coercion rather than loyalty.",
+    story: "An Askari collaborator — a man from the same region as Amari — reveals to the Governor the secret of Amari's amulet. The amulet is shattered. Amari temporarily loses his special powers and must fight through the upper levels on raw skill alone.",
+    mechanic: "Ability lockout — Spirit Sight, Nature Summons, and Shadow mechanic are disabled for this level. Players must rely on basic combat: melee, spear, bow, and dash. The difficulty spike is intentional and communicated through story. Powers return at level end.",
+    design: "Temporary ability removal tests true mastery while raising emotional stakes (Hollow Knight influence). Players who have relied on special powers face a genuine challenge. The betrayal narrative makes the restriction feel earned, not punitive.",
+    tagLabels: [{ t: "Abilities locked", c: "tag-boss" }, { t: "Narrative stakes", c: "tag-story" }]
+  },
+  {
+    num: 18, act: 4,
+    name: "The Spirit War",
+    location: "Fort Jesus Rooftop, Mombasa Harbour",
+    tags: ["all powers", "spectacle"],
+    color: "#3C3489", textColor: "#EEEDFE",
+    folklore: "In Swahili and coastal Kenyan cosmology, the Indian Ocean is inhabited by Mzimu (ancestral ocean spirits). Major storms are considered manifestations of ancestral anger. The ocean itself was regarded as a living entity — not a boundary but a presence.",
+    story: "Amari stands on the fort's rooftop. Below, his allies hold the courtyard. Above, the Governor's flagship prepares to escape. The recovered amulet, restored by the freed elders' combined blessings, pulses with every community's power. Amari raises it — and the ocean responds.",
+    mechanic: "Full power unlocked. All abilities available simultaneously for the first time. Combo chains between powers are possible (shadow-decoy into buffalo charge into eagle dive). A tidal surge environmental event clears groups of enemies. Time slows during extended combo chains.",
+    design: "Power fantasy culmination — the moment players have been building toward (Devil May Cry / God of War design payoff). Combo chaining makes mastery visible and spectacular. This level is designed to feel like a music video sequence.",
+    tagLabels: [{ t: "All powers", c: "tag-mechanic" }, { t: "Combo chains", c: "tag-boss" }]
+  },
+  {
+    num: 19, act: 4,
+    name: "The Iron Governor",
+    location: "Governor's Chamber, Fort Jesus",
+    tags: ["multi-phase boss", "final boss"],
+    color: "#3C3489", textColor: "#EEEDFE",
+    folklore: "Inspired by colonial administrators like Captain Richard Meinertzhagen, who documented — and committed — acts of extreme violence against Kenyan communities. He embodied the colonial belief in 'civilising through force.' His uniform and medals represented a system, not just a man.",
+    story: "Governor Maitland is not a simple villain. He genuinely believes he is bringing order. The fight is not just physical — his taunts reveal he knows each community's history, twisting their stories to justify conquest. Amari must silence him with action, not argument.",
+    mechanic: "Three-phase boss. Phase 1: ranged (Gatling gun — use terrain and shadow decoy). Phase 2: sword duel at close range (requires parry system, new mechanic introduced with 5-second tutorial window). Phase 3: Maitland uses poison gas — Amari fights weakened, time-limited.",
+    design: "Multi-phase boss as narrative journey (Sekiro design philosophy). Each phase reflects a colonial strategy: overwhelming firepower, personal combat superiority, and chemical warfare. Players physically experience the escalation of colonial violence.",
+    tagLabels: [{ t: "3-phase boss", c: "tag-boss" }, { t: "Parry system", c: "tag-mechanic" }]
+  },
+  {
+    num: 20, act: 4,
+    name: "Freedom's Wrath",
+    location: "Mombasa Harbour, The Sea",
+    tags: ["true final", "all communities"],
+    color: "#3C3489", textColor: "#EEEDFE",
+    folklore: "The name draws from a concept present in nearly every Kenyan community's warrior tradition: that freedom is not given but wrested, and that the land itself witnesses the sacrifice. In Swahili: Hasira ya Uhuru. In Nandi: the untranslatable roar that warriors made before a charge from which there was no retreat.",
+    story: "The Governor's flagship attempts to escape. On the harbour, every community Amari allied with — Nandi, Maasai, Luo, Kamba, Kikuyu, Giriama, Samburu, Meru, and the coastal Swahili — stands together for the first time. Koitalel's prophecy completes. The final confrontation is with the system the Governor represents — and Amari must choose how freedom is defined.",
+    mechanic: "True final encounter combines all enemy types from the game. Amari's full arsenal is required. A cinematic combo sequence ends the fight — players input a rhythm-based final strike using every weapon type once, representing each community's contribution. Two ending paths based on moral choices across levels 11–17.",
+    design: "Narrative and mechanical convergence at the climax (The Last of Us / Hades ending design). Rhythm-based final strike is accessible but ceremonial — it feels like a ritual, not a quick-time event. Dual endings honour player agency built over 20 levels.",
+    tagLabels: [{ t: "True ending", c: "tag-boss" }, { t: "Dual endings", c: "tag-story" }]
+  }
+];
+
+let openLevels = new Set();
+let currentAct = 'all';
+
+function filterAct(act) {
+  currentAct = act;
+  document.querySelectorAll('.act-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  render();
+}
+
+function toggleLevel(num) {
+  if (openLevels.has(num)) openLevels.delete(num);
+  else openLevels.add(num);
+  updateProgress();
+  render();
+}
+
+function updateProgress() {
+  const pct = Math.round((openLevels.size / 20) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = openLevels.size + ' of 20 levels explored';
+}
+
+const actNames = { 1: 'Act I — The Awakening (Levels 1–5)', 2: 'Act II — The Gathering (Levels 6–12)', 3: 'Act III — The Siege (Levels 13–17)', 4: 'Act IV — Freedom\'s Wrath (Levels 18–20)' };
+
+function render() {
+  const filtered = currentAct === 'all' ? LEVELS : LEVELS.filter(l => l.act === currentAct);
+  const byAct = {};
+  filtered.forEach(l => { if (!byAct[l.act]) byAct[l.act] = []; byAct[l.act].push(l); });
+
+  let html = '';
+  Object.keys(byAct).sort().forEach(act => {
+    html += `<div class="act-section">`;
+    if (currentAct === 'all') html += `<div class="act-label">${actNames[act]}</div>`;
+    byAct[act].forEach(l => {
+      const isOpen = openLevels.has(l.num);
+      const tagsHtml = l.tagLabels.map(t => `<span class="tag ${t.c}">${t.t}</span>`).join('');
+      html += `
+        <div class="level-card">
+          <div class="level-header" onclick="toggleLevel(${l.num})">
+            <div class="level-num" style="background:${l.color};color:${l.textColor};font-size:11px;">${l.num}</div>
+            <div class="level-title-wrap">
+              <div class="level-name">${l.name}</div>
+              <div class="level-location">${l.location}</div>
+            </div>
+            <div class="level-tags">${tagsHtml}</div>
+            <div class="expand-icon"><span class="chevron ${isOpen ? 'open' : ''}">&#9654;</span></div>
+          </div>
+          <div class="level-body ${isOpen ? 'open' : ''}">
+            <div class="divider"></div>
+            <div class="section-block">
+              <div class="section-label">Folklore & History</div>
+              <div class="section-text">${l.folklore}</div>
+            </div>
+            <div class="section-block">
+              <div class="section-label">Story Beat</div>
+              <div class="section-text">${l.story}</div>
+            </div>
+            <div class="section-block">
+              <div class="section-label">Unique Mechanic</div>
+              <div class="section-text">${l.mechanic}</div>
+            </div>
+            <div class="section-block">
+              <div class="section-label">Design Principle</div>
+              <div class="section-text">${l.design}</div>
+            </div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+
+  document.getElementById('levels-container').innerHTML = html;
+}
+
+render();
+</script>
