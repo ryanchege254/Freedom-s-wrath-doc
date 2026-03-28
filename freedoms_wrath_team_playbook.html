@@ -1,0 +1,462 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.root{padding:1rem 0;font-family:var(--font-sans)}
+.nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.5rem;border-bottom:0.5px solid var(--color-border-tertiary);padding-bottom:12px}
+.nav-btn{padding:6px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary);transition:all 0.15s}
+.nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-btn.active{background:#534AB7;color:#EEEDFE;border-color:#534AB7}
+.section{display:none}.section.active{display:block}
+.page-title{font-size:18px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.5rem;line-height:1.6}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.card-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+.card-body{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:12px;margin-bottom:12px}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin-right:4px;margin-bottom:4px}
+.badge-purple{background:#EEEDFE;color:#3C3489}
+.badge-teal{background:#E1F5EE;color:#085041}
+.badge-coral{background:#FAECE7;color:#993C1D}
+.badge-amber{background:#FAEEDA;color:#633806}
+.badge-gray{background:#F1EFE8;color:#444441}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:12px 0}
+.role-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.role-row:last-child{border-bottom:none}
+.avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;flex-shrink:0}
+.role-info{flex:1}
+.role-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.role-owns{font-size:12px;color:var(--color-text-secondary);margin-top:3px;line-height:1.5}
+.phase-row{display:flex;gap:0;margin-bottom:12px}
+.phase-cell{flex:1;padding:10px;border:0.5px solid var(--color-border-tertiary);font-size:12px}
+.phase-cell:first-child{border-radius:var(--border-radius-md) 0 0 var(--border-radius-md)}
+.phase-cell:last-child{border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.phase-label{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px}
+.phase-name{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.phase-weeks{font-size:11px;color:var(--color-text-tertiary)}
+.sprint-week{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:8px;overflow:hidden}
+.sprint-head{display:flex;align-items:center;gap:10px;padding:10px 14px;cursor:pointer;background:var(--color-background-secondary)}
+.sprint-head:hover{background:var(--color-background-tertiary)}
+.sprint-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.sprint-title{font-size:13px;font-weight:500;color:var(--color-text-primary);flex:1}
+.sprint-meta{font-size:11px;color:var(--color-text-tertiary)}
+.sprint-body{padding:12px 14px;display:none;border-top:0.5px solid var(--color-border-tertiary)}
+.sprint-body.open{display:block}
+.task-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary)}
+.task-row:last-child{border-bottom:none}
+.task-who{font-size:11px;min-width:56px;color:var(--color-text-tertiary)}
+.task-name{font-size:13px;color:var(--color-text-secondary);flex:1}
+.task-type{font-size:11px;padding:2px 7px;border-radius:20px}
+.tool-block{margin-bottom:10px}
+.tool-name{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.tool-desc{font-size:12px;color:var(--color-text-secondary);margin-top:2px;line-height:1.5}
+.tool-why{font-size:11px;margin-top:4px;padding:4px 8px;border-radius:var(--border-radius-md);background:var(--color-background-secondary);color:var(--color-text-tertiary)}
+.ref-card{border-left:3px solid #534AB7;padding:10px 12px;margin-bottom:10px;background:var(--color-background-secondary);border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.ref-game{font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.ref-team{font-size:11px;color:var(--color-text-tertiary);margin-bottom:4px}
+.ref-lesson{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.unity-folder{font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary);line-height:1.8;background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-md);margin-top:8px}
+.unity-folder .dir{color:var(--color-text-primary);font-weight:500}
+.unity-folder .file{color:var(--color-text-tertiary)}
+.rule-row{display:flex;gap:12px;padding:10px 0;border-bottom:0.5px solid var(--color-border-tertiary);align-items:flex-start}
+.rule-row:last-child{border-bottom:none}
+.rule-num{width:24px;height:24px;border-radius:50%;background:#EEEDFE;color:#3C3489;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;flex-shrink:0}
+.rule-text{font-size:13px;color:var(--color-text-secondary);line-height:1.5;flex:1}
+.rule-text strong{color:var(--color-text-primary);font-weight:500}
+.metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;text-align:center}
+.metric-val{font-size:22px;font-weight:500;color:var(--color-text-primary)}
+.metric-label{font-size:11px;color:var(--color-text-tertiary);margin-top:2px}
+.sendprompt-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary);margin-top:10px}
+.sendprompt-btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<div class="root">
+<div class="nav">
+  <button class="nav-btn active" onclick="showTab('roles')">Team & roles</button>
+  <button class="nav-btn" onclick="showTab('phases')">Project phases</button>
+  <button class="nav-btn" onclick="showTab('sprints')">Sprint playbook</button>
+  <button class="nav-btn" onclick="showTab('unity')">Unity setup</button>
+  <button class="nav-btn" onclick="showTab('tools')">Tool stack</button>
+  <button class="nav-btn" onclick="showTab('refs')">Indie references</button>
+  <button class="nav-btn" onclick="showTab('rules')">Non-negotiables</button>
+</div>
+
+<div id="tab-roles" class="section active">
+  <div class="page-title">Team structure — 5 people, clear ownership</div>
+  <div class="page-sub">Modelled on how Team Cherry (Hollow Knight, 2 devs + 1 artist) and Maddy Thorson's Celeste team (4 people) divided work. Each person owns a domain — you are never waiting for permission to make a decision inside your domain.</div>
+  <div class="metric-grid">
+    <div class="metric"><div class="metric-val">5</div><div class="metric-label">Team members</div></div>
+    <div class="metric"><div class="metric-val">2</div><div class="metric-label">Developers</div></div>
+    <div class="metric"><div class="metric-val">3</div><div class="metric-label">Designers</div></div>
+    <div class="metric"><div class="metric-val">2wk</div><div class="metric-label">Sprint length</div></div>
+  </div>
+  <div class="card">
+    <div class="role-row">
+      <div class="avatar" style="background:#EEEDFE;color:#3C3489">YOU</div>
+      <div class="role-info">
+        <div class="role-name">You — Product Lead + Lead Dev</div>
+        <div class="role-owns">Owns: final product decisions, Unity architecture, all game systems (player controller, enemy AI, combat), GitHub repo management, sprint planning, milestone sign-off. You are the single source of truth on "does this go in the game." Every disagreement ends with your call — no votes, no committees. Inspired by Toby Fox (Undertale) who was sole decision-maker even with collaborators.</div>
+        <div style="margin-top:6px"><span class="badge badge-purple">Lead Dev</span><span class="badge badge-purple">Product Lead</span><span class="badge badge-purple">Scrum Master</span></div>
+      </div>
+    </div>
+    <div class="role-row">
+      <div class="avatar" style="background:#E1F5EE;color:#085041">D2</div>
+      <div class="role-info">
+        <div class="role-name">Dev 2 — Systems & Integration Dev</div>
+        <div class="role-owns">Owns: UI systems (menus, HUD, health bar), audio integration in Unity, scene management, build pipeline, integrating designer assets into the game (importing sprites, setting up animators). Does NOT design assets — receives them from designers and wires them up. This separation is how Team Cherry avoided asset-integration bottlenecks.</div>
+        <div style="margin-top:6px"><span class="badge badge-teal">UI Systems</span><span class="badge badge-teal">Audio</span><span class="badge badge-teal">Asset Integration</span><span class="badge badge-teal">Builds</span></div>
+      </div>
+    </div>
+    <div class="role-row">
+      <div class="avatar" style="background:#FAEEDA;color:#633806">D1</div>
+      <div class="role-info">
+        <div class="role-name">Designer 1 — Lead Artist + Art Director</div>
+        <div class="role-owns">Owns: visual style bible, character design (Amari + enemies), animation frames, final approval on all visual output from D2 and D3. Sets the colour palette, line-weight rules, and reference boards all other designers work from. Equivalent to Ari Gibson's role at Team Cherry — the person whose eye sets the bar.</div>
+        <div style="margin-top:6px"><span class="badge badge-amber">Art Director</span><span class="badge badge-amber">Character Art</span><span class="badge badge-amber">Animation</span></div>
+      </div>
+    </div>
+    <div class="role-row">
+      <div class="avatar" style="background:#FAECE7;color:#993C1D">D2</div>
+      <div class="role-info">
+        <div class="role-name">Designer 2 — Environment & Level Artist</div>
+        <div class="role-owns">Owns: all background art, tile sets, parallax layers, level layout mockups (passed to you for implementation). Works from Lead Artist's style bible. Delivers assets in agreed formats and naming conventions every sprint. Equivalent to how ConcernedApe (Stardew Valley) structured his outsourced art after going solo — tight handoff spec, loose creative execution.</div>
+        <div style="margin-top:6px"><span class="badge badge-coral">Environments</span><span class="badge badge-coral">Tilesets</span><span class="badge badge-coral">Level Layouts</span></div>
+      </div>
+    </div>
+    <div class="role-row">
+      <div class="avatar" style="background:#F1EFE8;color:#444441">D3</div>
+      <div class="role-info">
+        <div class="role-name">Designer 3 — UI/UX + Sound Design</div>
+        <div class="role-owns">Owns: all UI visual design (buttons, menus, HUD layout), icon design, sound asset sourcing and editing (FX files handed to Dev 2 for integration). Also owns the Miro board maintenance — keeps it updated after every sprint. This dual role works at your team size; it breaks at 10+ people.</div>
+        <div style="margin-top:6px"><span class="badge badge-gray">UI Design</span><span class="badge badge-gray">Sound Assets</span><span class="badge badge-gray">Miro Board</span></div>
+      </div>
+    </div>
+  </div>
+  <button class="sendprompt-btn" onclick="sendPrompt('Give me a RACI chart for Freedom\'s Wrath team tasks')">Generate a RACI responsibility chart ↗</button>
+</div>
+
+<div id="tab-phases" class="section">
+  <div class="page-title">Project phases — from blank scene to shipped game</div>
+  <div class="page-sub">Based on how Celeste (7 months), Hollow Knight (2.5 years on weekends), and A Short Hike (4 months) structured their development. Each phase has a hard exit condition — you don't move on until that condition is met.</div>
+  <div class="phase-row">
+    <div class="phase-cell" style="background:#EEEDFE">
+      <div class="phase-label" style="color:#534AB7">Phase 0</div>
+      <div class="phase-name" style="color:#26215C">Pre-production</div>
+      <div class="phase-weeks" style="color:#534AB7">Weeks 1–4</div>
+    </div>
+    <div class="phase-cell" style="background:#E1F5EE">
+      <div class="phase-label" style="color:#0F6E56">Phase 1</div>
+      <div class="phase-name" style="color:#04342C">Prototype</div>
+      <div class="phase-weeks" style="color:#0F6E56">Weeks 5–10</div>
+    </div>
+    <div class="phase-cell" style="background:#FAEEDA">
+      <div class="phase-label" style="color:#854F0B">Phase 2</div>
+      <div class="phase-name" style="color:#412402">Alpha</div>
+      <div class="phase-weeks" style="color:#854F0B">Weeks 11–30</div>
+    </div>
+    <div class="phase-cell" style="background:#FAECE7">
+      <div class="phase-label" style="color:#993C1D">Phase 3</div>
+      <div class="phase-name" style="color:#4A1B0C">Beta</div>
+      <div class="phase-weeks" style="color:#993C1D">Weeks 31–40</div>
+    </div>
+    <div class="phase-cell" style="background:#F1EFE8">
+      <div class="phase-label" style="color:#5F5E5A">Phase 4</div>
+      <div class="phase-name" style="color:#2C2C2A">Launch</div>
+      <div class="phase-weeks" style="color:#5F5E5A">Weeks 41–44</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Phase 0 — Pre-production (Weeks 1–4)</div>
+    <div class="card-body">Exit condition: <strong>every team member can open the Miro board and answer "what am I building this week" without asking you.</strong> This is what Eric Barone (ConcernedApe) said he wished he'd done before starting Stardew Valley's code — a full documented design before touching the engine.
+    <div class="divider"></div>
+    You: Finalise game design document. Write the core mechanics spec (player controller rules, combat numbers, camera rules). Set up GitHub repo and Unity project skeleton. Define folder structure (see Unity tab).<br><br>
+    D1: Deliver style bible — 1 hero character sheet for Amari, colour palette (max 5 colours + shades), line weight rule, and 3 enemy silhouettes.<br><br>
+    D2: Deliver 2 level layout mockups (Miro) for levels 1 and 4. No art yet — boxes and labels only.<br><br>
+    D3: Set up Miro board with all 5 zones. Deliver UI wireframes for main menu, HUD, and game-over screen. Source 10 placeholder sound FX from freesound.org.<br><br>
+    Dev 2: Set up Notion workspace. Create sprint template. Research Unity packages needed (Cinemachine, TextMeshPro, Input System).</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Phase 1 — Prototype (Weeks 5–10)</div>
+    <div class="card-body">Exit condition: <strong>a playable grey-box level with all core mechanics functional. No art. Any team member can play it and understand the game loop.</strong> Hollow Knight's Team Cherry spent 6 months in pure prototype before touching final art — this discipline is why the game feels tight.<br><br>
+    You: Build player controller (movement, jump, wall-jump, dash). Build basic enemy AI (patrol, detect, attack). Build combat system (melee, spear throw). Camera follow with Cinemachine.<br><br>
+    Dev 2: Build main menu scene, health UI, score display. Wire placeholder audio. Set up scene loader.<br><br>
+    Designers: Produce final art for Level 1 only. D1 animates Amari (idle, run, jump, attack — minimum viable set). D2 delivers Level 1 tileset. D3 delivers HUD visual design and first 5 real sound FX.<br><br>
+    End of Phase 1 deliverable: a fully playable Level 1 with real art. This becomes your demo for any future funding or publisher conversations.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Phase 2 — Alpha (Weeks 11–30)</div>
+    <div class="card-body">Exit condition: <strong>all 20 levels exist in grey-box form, 5 levels have final art, and the core mechanical loop has been playtested by at least 10 people outside the team.</strong><br><br>
+    This is your longest phase — protect it from feature creep. Celeste's team used a strict rule: no new mechanics after week 8 of alpha. Any new idea goes on a "maybe list" — reviewed only at phase end.<br><br>
+    Cadence: 2-week sprints. Each sprint ships at least 2 new grey-box levels and progresses 1 level to final art. You hold a 30-minute sprint review every second Friday. No exceptions — the rhythm creates accountability without management overhead.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Phase 3 — Beta (Weeks 31–40)</div>
+    <div class="card-body">Exit condition: <strong>all 20 levels have final art and are bug-free on the target platform. A build has been sent to 20 external playtesters and their feedback has been actioned.</strong><br><br>
+    Feature lock at week 31 — nothing new enters the game. The only allowed work is: bug fixing, polish (juice, particle FX, screen shake), performance optimisation, and sound mix. This is the phase most indie teams skip and then regret. Undertale's 1.0 launch was noticeably rough; Toby Fox spent months on patches that a proper beta would have caught.</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Phase 4 — Launch (Weeks 41–44)</div>
+    <div class="card-body">Exit condition: <strong>submitted to target stores, trailer published, press kit live.</strong><br><br>
+    You: Final builds for all platforms. Submission checklist (Google Play / App Store / itch.io / Steam). Store page copy and screenshots.<br><br>
+    D3: Trailer editing, press kit design (logo, screenshots, one-sheet). Social media asset pack.<br><br>
+    Dev 2: Analytics integration (if applicable). Crash reporting setup. Launch day monitoring plan.</div>
+  </div>
+</div>
+
+<div id="tab-sprints" class="section">
+  <div class="page-title">2-week sprint structure — week by week</div>
+  <div class="page-sub">Adapted from how Celeste's team ran "playable Friday" — every two weeks, the game must be in a playable state by end of day Friday. No exceptions. This forces integration and prevents the "95% done" trap where nothing ever ships.</div>
+
+  <div class="sprint-week">
+    <div class="sprint-head" onclick="toggleSprint('s1')">
+      <div class="sprint-dot" style="background:#534AB7"></div>
+      <div class="sprint-title">Monday — Sprint kickoff (60 min, whole team)</div>
+      <div class="sprint-meta">Week 1 of every sprint</div>
+    </div>
+    <div class="sprint-body" id="s1">
+      <div class="task-row"><div class="task-who" style="color:#3C3489">You</div><div class="task-name">Read out sprint goal in one sentence. What does "done" look like on Friday week 2?</div><span class="task-type badge-purple badge">Lead</span></div>
+      <div class="task-row"><div class="task-who" style="color:#085041">All</div><div class="task-name">Each person picks their tasks from the Notion backlog. Nobody is assigned tasks — they self-select. This is the Valve "flat structure" principle adapted for small teams: ownership increases quality.</div><span class="task-type badge-teal badge">Ownership</span></div>
+      <div class="task-row"><div class="task-who" style="color:#3C3489">You</div><div class="task-name">Identify the one task that will block everyone if it's late (the "critical path" task). Assign it to yourself or Dev 2 before anyone else picks work.</div><span class="task-type badge-purple badge">Risk</span></div>
+      <div class="task-row"><div class="task-who" style="color:#444441">D3</div><div class="task-name">Update Miro board with sprint goal sticky note. Archive last sprint's notes.</div><span class="task-type badge-gray badge">Admin</span></div>
+    </div>
+  </div>
+
+  <div class="sprint-week">
+    <div class="sprint-head" onclick="toggleSprint('s2')">
+      <div class="sprint-dot" style="background:#0F6E56"></div>
+      <div class="sprint-title">Wed/Thu — Asset handoff window (30 min check-in)</div>
+      <div class="sprint-meta">Week 1 of every sprint — mid-sprint sync</div>
+    </div>
+    <div class="sprint-body" id="s2">
+      <div class="task-row"><div class="task-who" style="color:#085041">D1</div><div class="task-name">Deliver any character or animation assets to shared Google Drive folder marked /READY-FOR-DEV. Never send via WhatsApp or Slack — single source of truth only.</div><span class="task-type badge-teal badge">Handoff</span></div>
+      <div class="task-row"><div class="task-who" style="color:#993C1D">Dev 2</div><div class="task-name">Pull assets from /READY-FOR-DEV folder, import into Unity, report any format issues back to designer the same day. Never wait until Friday to discover a file is wrong.</div><span class="task-type badge-coral badge">Integration</span></div>
+      <div class="task-row"><div class="task-who" style="color:#3C3489">You</div><div class="task-name">Quick 1:1 with each person — not a meeting, a 5-minute Slack/WhatsApp check. "Anything blocking you?" is the only question. Remove blockers immediately.</div><span class="task-type badge-purple badge">Unblock</span></div>
+    </div>
+  </div>
+
+  <div class="sprint-week">
+    <div class="sprint-head" onclick="toggleSprint('s3')">
+      <div class="sprint-dot" style="background:#854F0B"></div>
+      <div class="sprint-title">Friday — Playable build day (all day)</div>
+      <div class="sprint-meta">Week 2 of every sprint — the non-negotiable deadline</div>
+    </div>
+    <div class="sprint-body" id="s3">
+      <div class="task-row"><div class="task-who" style="color:#993C1D">Dev 2</div><div class="task-name">Generate a Unity build by 3pm Friday. Upload to shared drive. Send link to whole team — no "it works on my machine" allowed.</div><span class="task-type badge-coral badge">Build</span></div>
+      <div class="task-row"><div class="task-who" style="color:#444441">All</div><div class="task-name">Everyone plays the build for 20 minutes and drops written feedback into a Notion doc before the 4pm review. Written first — prevents groupthink in the verbal review.</div><span class="task-type badge-gray badge">Playtest</span></div>
+      <div class="task-row"><div class="task-who" style="color:#3C3489">You</div><div class="task-name">30-minute sprint review. Three questions only: (1) What shipped? (2) What didn't and why? (3) What changes to the plan next sprint? No blame, no excuses — just facts and adjustments.</div><span class="task-type badge-purple badge">Review</span></div>
+      <div class="task-row"><div class="task-who" style="color:#3C3489">You</div><div class="task-name">Update the milestone tracker on Miro. If you're behind, cut scope — never extend the sprint. This is the most important discipline in indie dev (lesson from Shovel Knight's Jake Kaufman: "cut a feature, ship the game").</div><span class="task-type badge-purple badge">Scope</span></div>
+    </div>
+  </div>
+
+  <div class="sprint-week">
+    <div class="sprint-head" onclick="toggleSprint('s4')">
+      <div class="sprint-dot" style="background:#5F5E5A"></div>
+      <div class="sprint-title">Monthly — Design review (2 hours, designers only)</div>
+      <div class="sprint-meta">First Monday of each month</div>
+    </div>
+    <div class="sprint-body" id="s4">
+      <div class="task-row"><div class="task-who" style="color:#633806">D1</div><div class="task-name">Present the last month's art output. Does it still match the style bible? Flag any drift early — style inconsistency compounds badly over time.</div><span class="task-type badge-amber badge">Art</span></div>
+      <div class="task-row"><div class="task-who" style="color:#444441">D3</div><div class="task-name">Present UI and sound assets completed. Review against the HUD wireframe — any deviations need sign-off from you before they stay in.</div><span class="task-type badge-gray badge">UI</span></div>
+      <div class="task-row"><div class="task-who" style="color:#3C3489">You</div><div class="task-name">Attend as observer only for the first 90 minutes — let designers own the conversation. Last 30 minutes: give your feedback and decisions on any open design questions. This is the Miyamoto model: director input comes last, not first.</div><span class="task-type badge-purple badge">Director</span></div>
+    </div>
+  </div>
+</div>
+
+<div id="tab-unity" class="section">
+  <div class="page-title">Unity project structure — how to organise the repo</div>
+  <div class="page-sub">Based on Unity's own best practices guide and how Celeste's open-source structure was organised post-release. The rule: any developer should be able to clone the repo and find any file within 10 seconds.</div>
+
+  <div class="card">
+    <div class="card-title">Folder structure — Assets/</div>
+    <div class="unity-folder">
+<span class="dir">Assets/</span><br>
+&nbsp;&nbsp;<span class="dir">_Project/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">← all YOUR files live here, not root</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Scripts/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Player/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">PlayerController.cs, PlayerCombat.cs</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Enemies/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">EnemyBase.cs, SoldierAI.cs, BossAI.cs</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Systems/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">GameManager.cs, AudioManager.cs, UIManager.cs</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Abilities/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">SpiritSight.cs, ShadowDecoy.cs, NatureSummon.cs</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Level/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">LevelManager.cs, SpawnPoint.cs, Checkpoint.cs</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Art/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Characters/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Amari/, Soldiers/, Bosses/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Environments/</span> &nbsp;&nbsp;&nbsp;<span class="file">Level01_Nandi/, Level02_Rift/, etc.</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">UI/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">HUD/, Menus/, Icons/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">VFX/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">BloodSplatter/, Particles/, Trails/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Audio/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">SFX/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Combat/, Environment/, UI/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Music/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Act01/, Act02/, Act03/, Act04/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Scenes/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">MainMenu.unity, Level01.unity ... Level20.unity, Boot.unity</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Prefabs/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Enemies/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Soldier_Basic.prefab, Soldier_Elite.prefab</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Player/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Amari.prefab, AmariAbilities.prefab</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">Animations/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">Amari.controller, Soldier.controller, Boss_Governor.controller</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir">ScriptableObjects/</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">WeaponData/, EnemyStats/, LevelConfig/</span><br>
+<span class="dir">ThirdParty/</span> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="file">← ALL Unity packages go here, never mixed in</span><br>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">Git workflow — 3-branch rule</div>
+      <div class="card-body"><code style="font-size:12px;font-family:var(--font-mono)">main</code> — always a playable build. Nobody commits directly here.<br><br><code style="font-size:12px;font-family:var(--font-mono)">dev</code> — integration branch. You and Dev 2 merge feature branches here. Builds cut from dev every Friday.<br><br><code style="font-size:12px;font-family:var(--font-mono)">feature/[name]</code> — one branch per feature. Examples: <code style="font-size:11px;font-family:var(--font-mono)">feature/shadow-mechanic</code>, <code style="font-size:11px;font-family:var(--font-mono)">feature/level-03</code>. Never merge to main directly — always through dev with your review.</div>
+    </div>
+    <div class="card">
+      <div class="card-title">ScriptableObjects — your secret weapon</div>
+      <div class="card-body">Use ScriptableObjects for all game data that designers might want to tweak: enemy health, weapon damage, spawn rates, ability cooldowns. This lets Dev 2 or even designers adjust balance without touching code. Hollow Knight used this pattern extensively — non-programmers could tune combat feel without you.<br><br>Create a <code style="font-size:12px;font-family:var(--font-mono)">EnemyStatsSO.cs</code> for every enemy type. Store instances in <code style="font-size:12px;font-family:var(--font-mono)">ScriptableObjects/EnemyStats/</code>.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Unity packages to install at project start</div>
+    <div class="card-body">
+      <span class="badge badge-purple">Cinemachine</span> — camera follow, screen shake, zoom. Replaces all manual camera code.<br>
+      <span class="badge badge-teal">Input System (new)</span> — cross-platform input. Set up once, works on PC, Android, iOS without code changes.<br>
+      <span class="badge badge-amber">TextMeshPro</span> — all in-game text. Crisp at any resolution; standard fonts look bad on mobile.<br>
+      <span class="badge badge-coral">2D Animation (Sprite Rigging)</span> — bone-based animation for Amari. Reduces the number of animation frames designers need to draw.<br>
+      <span class="badge badge-gray">Universal Render Pipeline (URP)</span> — better 2D lighting. Use this from day one — switching pipelines mid-project is a nightmare (ask any Unity dev who's done it).<br>
+      <span class="badge badge-purple">Unity Analytics or GameAnalytics SDK</span> — install early even if you don't use it yet. Retroactively adding analytics to an existing codebase is painful.
+    </div>
+  </div>
+</div>
+
+<div id="tab-tools" class="section">
+  <div class="page-title">Tool stack — one tool per job, no overlaps</div>
+  <div class="page-sub">The biggest indie team killer is using 4 tools for the same job. Each tool below is the only tool for its category. If a new tool is proposed, it replaces an existing one — it never joins it.</div>
+
+  <div class="tool-block">
+    <div class="tool-name">Unity (2022 LTS) — game engine</div>
+    <div class="tool-desc">Use the Long Term Support version, not the latest. Stability over features. Lock the Unity version in the project on day one — everyone must use the same version or you'll fight phantom bugs for months.</div>
+    <div class="tool-why">Why: 2D tooling, huge asset store, dominant mobile export. Used by Hollow Knight, Cuphead, Ori.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tool-block">
+    <div class="tool-name">GitHub + Git LFS — version control</div>
+    <div class="tool-desc">Git LFS (Large File Storage) is mandatory for Unity — without it, binary assets bloat the repo and break everything. Set up .gitattributes for all art formats on day one: .png, .psd, .wav, .mp3, .anim, .unity, .prefab.</div>
+    <div class="tool-why">Why: free for small teams, GitHub Desktop UI makes it accessible to designers who haven't used Git before.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tool-block">
+    <div class="tool-name">Notion — task management + documentation</div>
+    <div class="tool-desc">Two databases: Sprint Backlog (Kanban view with columns: Backlog / This Sprint / In Progress / In Review / Done) and Design Decisions Log (every major decision recorded with the date, who made it, and why — this prevents "I thought we decided X" arguments at month 3).</div>
+    <div class="tool-why">Why: free tier covers your team size. More flexible than Trello, less heavy than Jira. Toby Fox used Google Docs — Notion is the modern equivalent with database features.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tool-block">
+    <div class="tool-name">Miro — visual planning + design review</div>
+    <div class="tool-desc">Already in your workflow. Keep it as the visual layer only — level layout mockups, art style boards, sprint retrospective notes, the milestone timeline. Do not use it for task tracking (that's Notion's job).</div>
+    <div class="tool-why">Why: your designers live in visual tools. Miro meets them where they work instead of forcing them into Notion's text-heavy interface.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tool-block">
+    <div class="tool-name">Aseprite — pixel art and animation</div>
+    <div class="tool-desc">If your art style is pixel art (recommended for a 5-person first-time team — scope control). Aseprite exports sprite sheets directly in formats Unity expects. D1 and D2 work here; output goes to the shared drive /READY-FOR-DEV folder.</div>
+    <div class="tool-why">Why: $19.99 one-time, purpose-built for game sprites, directly imports into Unity via sprite sheet slicing. Stardew Valley was built entirely in Aseprite.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tool-block">
+    <div class="tool-name">FMOD or Unity's built-in Audio Mixer — sound</div>
+    <div class="tool-desc">Start with Unity's built-in Audio Mixer — it's simpler and more than enough for your scope. Only move to FMOD if you need adaptive music (music that changes based on game state, like Celeste's dynamic layers). D3 exports audio as .wav files; Dev 2 imports and wires in Unity.</div>
+    <div class="tool-why">Why: avoid introducing FMOD complexity until you need it. Most first-time teams over-engineer audio.</div>
+  </div>
+  <div class="divider"></div>
+  <div class="tool-block">
+    <div class="tool-name">WhatsApp / Discord — async communication</div>
+    <div class="tool-desc">One channel only for each purpose. #general (social), #dev-log (code updates), #art-wip (design work in progress, no feedback allowed here — feedback only in sprint review), #blockers (if something is stuck, post here and anyone can help). Disable notifications outside 8am–8pm — protect deep work time.</div>
+    <div class="tool-why">Why: communication overhead kills small teams. Structured channels prevent decision fatigue.</div>
+  </div>
+</div>
+
+<div id="tab-refs" class="section">
+  <div class="page-title">Real-world indie references — lessons for your team</div>
+  <div class="page-sub">Every working practice in this guide is drawn from documented accounts of how successful indie studios operated. These are the primary case studies.</div>
+
+  <div class="ref-card" style="border-left-color:#534AB7">
+    <div class="ref-game">Hollow Knight — Team Cherry</div>
+    <div class="ref-team">Ari Gibson (art), William Pellen (code), Jack Kelly (marketing) — 3 people, part-time nights and weekends, 2.5 years</div>
+    <div class="ref-lesson">Key lesson for you: They kept a strict "one mechanic at a time" rule. A feature wasn't added to the sprint until the previous one was fully integrated and playtested. This is why the game feels mechanically clean. Apply this to Freedom's Wrath: finish Shadow Mechanic before starting Spirit Sight, even if both are designed.</div>
+  </div>
+  <div class="ref-card" style="border-left-color:#0F6E56">
+    <div class="ref-game">Celeste — Maddy Thorson + Noel Berry</div>
+    <div class="ref-team">2 developers + composer Lena Raine + artist Pedro Medeiros — built in 4 days as prototype, 7 months to ship</div>
+    <div class="ref-lesson">Key lesson for you: Their "playable Friday" rule is the most important thing you can steal. Every Friday the game must be playable. Not "mostly done" — playable. This catches integration bugs, keeps morale high (you see progress weekly), and forces honest scope cuts before they become crises.</div>
+  </div>
+  <div class="ref-card" style="border-left-color:#854F0B">
+    <div class="ref-game">Stardew Valley — ConcernedApe (Eric Barone)</div>
+    <div class="ref-team">1 developer, 4.5 years solo, outsourced music at the end</div>
+    <div class="ref-lesson">Key lesson for you: He built the entire game before releasing it — no early access, no crowdfunding. But more importantly, he maintained a strict daily development log. Every day he wrote what he did, what he planned tomorrow, and what was blocked. You should do this as a shared Notion doc your team can read. It creates accountability without micromanagement, and is a goldmine for postmortem reflection.</div>
+  </div>
+  <div class="ref-card" style="border-left-color:#993C1D">
+    <div class="ref-game">Shovel Knight — Yacht Club Games</div>
+    <div class="ref-team">Originally 4 ex-WayForward developers, grew to 12 — started with a Kickstarter</div>
+    <div class="ref-lesson">Key lesson for you: Their postmortem is famous for one line — "We cut a third of our planned content and the game is better for it." They had planned 12 enemy types per world and shipped 6. For Freedom's Wrath: your 20-level structure is ambitious for 2 devs. Define your minimum viable version (10 levels, 2 acts) before you start. That way, if life happens, you ship something — not nothing.</div>
+  </div>
+  <div class="ref-card" style="border-left-color:#444441">
+    <div class="ref-game">Undertale — Toby Fox</div>
+    <div class="ref-team">Primarily 1 developer, art outsourced to Temmie Chang, Kickstarter funded</div>
+    <div class="ref-lesson">Key lesson for you: Toby made one rule — write the story completely before building the game. He had the ending of Undertale written before level 1 was playable. For Freedom's Wrath, you've already done this (your 20-level narrative is fully designed). The lesson is: protect the story. When a mechanic feels fun but doesn't serve the story, cut the mechanic — not the story.</div>
+  </div>
+  <div class="ref-card" style="border-left-color:#1D9E75">
+    <div class="ref-game">A Short Hike — Adam Robinson-Yu</div>
+    <div class="ref-team">1 developer, 4 months, intentionally small scope</div>
+    <div class="ref-lesson">Key lesson for you: He documented his development publicly on Twitter throughout — no publisher, no marketing budget, just showing work. By launch he had an audience. You are building a story that is culturally specific and meaningful. Document it publicly on social media from day one. Kenyan game dev is an underrepresented story that people will follow.</div>
+  </div>
+</div>
+
+<div id="tab-rules" class="section">
+  <div class="page-title">Non-negotiables — rules that protect the project</div>
+  <div class="page-sub">These are the decisions that must be made once and never revisited. Successful indie teams protect their energy by making these rules before problems arise, not after.</div>
+
+  <div class="card">
+    <div class="rule-row">
+      <div class="rule-num">1</div>
+      <div class="rule-text"><strong>Never extend a sprint.</strong> If work doesn't fit, cut scope. If you extend sprints, your milestones become fiction and the team stops trusting deadlines. Celeste's team cut 3 full levels from the shipped game — the game is better for it.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">2</div>
+      <div class="rule-text"><strong>Feature lock at alpha.</strong> Once Phase 2 begins, no new mechanics. New ideas go on a "next game" list. Freedom's Wrath has 20 levels and 8+ mechanics — it does not need more ideas. It needs execution.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">3</div>
+      <div class="rule-text"><strong>One source of truth for every type of information.</strong> Assets live in Google Drive. Tasks live in Notion. Visual plans live in Miro. Code lives in GitHub. Nothing lives in anyone's personal laptop. If it's not in the shared system, it doesn't exist.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">4</div>
+      <div class="rule-text"><strong>Playtest with strangers every month.</strong> Your team will go blind to your own game within weeks. Find 3 people outside the team every month and watch them play silently — don't explain anything, don't help them. What they get stuck on is your UI/UX problem, not their problem.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">5</div>
+      <div class="rule-text"><strong>You are the final decision-maker on the product. Designers own the aesthetics within the style bible.</strong> Never design by committee — it produces average results. The Lead Artist's visual decisions are final in her domain. Your game design decisions are final in yours. Overlaps are resolved by you, once, in writing.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">6</div>
+      <div class="rule-text"><strong>The main branch always builds.</strong> A broken main branch is a team emergency — drop everything, fix it immediately. This is a rule at every professional studio from Rockstar to indie teams of 3. A broken build destroys morale and wastes everyone's time.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">7</div>
+      <div class="rule-text"><strong>Document decisions, not opinions.</strong> The Notion Design Decisions Log records what was decided and why — not who wanted what. This prevents the "but I thought we agreed" argument that derails teams at month 4. Every major game design choice gets a 3-line entry: decision, reason, who made the call.</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-num">8</div>
+      <div class="rule-text"><strong>Ship a minimum viable version first.</strong> Define 10 levels as your floor before starting. If life, money, or time forces a change — you ship 10 great levels rather than 20 unfinished ones. You can always add more post-launch (Hollow Knight shipped 4 free DLC expansions after launch).</div>
+    </div>
+  </div>
+  <button class="sendprompt-btn" onclick="sendPrompt('Give me a Notion database template for the Freedom\'s Wrath sprint backlog')">Generate a Notion sprint template ↗</button>
+</div>
+</div>
+
+<script>
+function showTab(id){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  event.target.classList.add('active');
+}
+function toggleSprint(id){
+  const b=document.getElementById(id);
+  b.classList.toggle('open');
+}
+</script>

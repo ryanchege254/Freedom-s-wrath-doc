@@ -1,0 +1,260 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.root{padding:1rem 0;font-family:var(--font-sans)}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.legend-label{font-size:12px;color:var(--color-text-tertiary);margin-right:4px}
+.leg{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text-secondary)}
+.dot{width:20px;height:20px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:500}
+.r-R{background:#EEEDFE;color:#3C3489}
+.r-A{background:#E1F5EE;color:#085041}
+.r-C{background:#FAEEDA;color:#633806}
+.r-I{background:#F1EFE8;color:#444441}
+.r-{background:transparent;color:transparent}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.ctrl-label{font-size:12px;color:var(--color-text-tertiary)}
+.filter-btn{padding:4px 12px;border:0.5px solid var(--color-border-secondary);border-radius:20px;font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary)}
+.filter-btn.on{background:#534AB7;color:#EEEDFE;border-color:#534AB7}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+thead th{padding:8px 6px;font-weight:500;font-size:11px;color:var(--color-text-tertiary);text-align:center;border-bottom:0.5px solid var(--color-border-secondary);white-space:nowrap}
+thead th.task-col{text-align:left;width:36%}
+thead th.member-col{width:13%}
+.cat-row td{padding:6px 6px 4px;font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:var(--color-text-tertiary);background:var(--color-background-secondary);border-top:0.5px solid var(--color-border-tertiary)}
+.data-row td{padding:7px 6px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+.data-row:hover td{background:var(--color-background-secondary)}
+.task-name{color:var(--color-text-primary);font-size:12px;line-height:1.4}
+.task-note{color:var(--color-text-tertiary);font-size:11px;margin-top:1px}
+.cell{text-align:center}
+.chip{width:22px;height:22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;margin:auto}
+.hidden{display:none}
+.member-header{display:flex;flex-direction:column;align-items:center;gap:2px}
+.avatar{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:500;margin:0 auto 2px}
+.av-you{background:#EEEDFE;color:#3C3489}
+.av-dev2{background:#E1F5EE;color:#085041}
+.av-d1{background:#FAEEDA;color:#633806}
+.av-d2{background:#FAECE7;color:#993C1D}
+.av-d3{background:#F1EFE8;color:#444441}
+.summary-bar{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.sum-card{flex:1;min-width:100px;background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.sum-name{font-size:11px;color:var(--color-text-tertiary);margin-bottom:6px}
+.sum-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.sum-lbl{font-size:11px;color:var(--color-text-secondary)}
+.sum-val{font-size:11px;font-weight:500;color:var(--color-text-primary)}
+</style>
+
+<div class="root">
+
+<div class="legend">
+  <span class="legend-label">Key:</span>
+  <span class="leg"><span class="dot r-R">R</span> Responsible — does the work</span>
+  <span class="leg"><span class="dot r-A">A</span> Accountable — owns the outcome</span>
+  <span class="leg"><span class="dot r-C">C</span> Consulted — gives input</span>
+  <span class="leg"><span class="dot r-I">I</span> Informed — kept in loop</span>
+</div>
+
+<div class="controls">
+  <span class="ctrl-label">Filter by person:</span>
+  <button class="filter-btn on" onclick="filterPerson('all',this)">All</button>
+  <button class="filter-btn" onclick="filterPerson('you',this)">You</button>
+  <button class="filter-btn" onclick="filterPerson('dev2',this)">Dev 2</button>
+  <button class="filter-btn" onclick="filterPerson('d1',this)">D1</button>
+  <button class="filter-btn" onclick="filterPerson('d2',this)">D2</button>
+  <button class="filter-btn" onclick="filterPerson('d3',this)">D3</button>
+</div>
+
+<div class="tbl-wrap">
+<table id="raci-table">
+<thead>
+  <tr>
+    <th class="task-col">Task</th>
+    <th class="member-col"><div class="member-header"><div class="avatar av-you">YOU</div><span>You</span></div></th>
+    <th class="member-col"><div class="member-header"><div class="avatar av-dev2">D2</div><span>Dev 2</span></div></th>
+    <th class="member-col"><div class="member-header"><div class="avatar av-d1">D1</div><span>D1</span></div></th>
+    <th class="member-col"><div class="member-header"><div class="avatar av-d2">D2a</div><span>D2</span></div></th>
+    <th class="member-col"><div class="member-header"><div class="avatar av-d3">D3</div><span>D3</span></div></th>
+  </tr>
+</thead>
+<tbody id="raci-body"></tbody>
+</table>
+</div>
+
+<div class="summary-bar" id="summary-bar"></div>
+</div>
+
+<script>
+const CATS = [
+  {
+    cat:"Project management",
+    rows:[
+      {task:"Game design document",note:"Core mechanics, level specs, story doc",you:"A",dev2:"I",d1:"C",d2:"C",d3:"C"},
+      {task:"Sprint planning",note:"Every 2-week kickoff",you:"A",dev2:"R",d1:"R",d2:"R",d3:"R"},
+      {task:"Milestone sign-off",note:"Phase gates",you:"A",dev2:"I",d1:"I",d2:"I",d3:"I"},
+      {task:"Miro board upkeep",note:"After every sprint",you:"A",dev2:"I",d1:"I",d2:"I",d3:"R"},
+      {task:"Notion task management",note:"Sprint backlog",you:"A",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"Design decisions log",note:"Recording key choices",you:"A",dev2:"C",d1:"C",d2:"C",d3:"R"},
+    ]
+  },
+  {
+    cat:"Development — core systems",
+    rows:[
+      {task:"Unity project setup",note:"Folder structure, Git LFS, packages",you:"R",dev2:"C",d1:"I",d2:"I",d3:"I"},
+      {task:"Player controller",note:"Movement, jump, wall-jump, dash",you:"R",dev2:"I",d1:"C",d2:"I",d3:"I"},
+      {task:"Combat system",note:"Melee, spear, bow, choke-hold",you:"R",dev2:"I",d1:"C",d2:"I",d3:"I"},
+      {task:"Enemy AI",note:"Patrol, detect, attack patterns",you:"R",dev2:"C",d1:"I",d2:"I",d3:"I"},
+      {task:"Ability systems",note:"Spirit sight, shadow, summons",you:"R",dev2:"C",d1:"C",d2:"I",d3:"I"},
+      {task:"Boss AI",note:"Multi-phase boss logic",you:"R",dev2:"C",d1:"C",d2:"I",d3:"I"},
+      {task:"Level scripting",note:"Spawn points, triggers, checkpoints",you:"R",dev2:"R",d1:"I",d2:"C",d3:"I"},
+      {task:"GitHub repo management",note:"Branches, merges, code review",you:"A",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"ScriptableObjects setup",note:"Enemy stats, weapon data",you:"R",dev2:"C",d1:"I",d2:"I",d3:"I"},
+      {task:"Camera system (Cinemachine)",note:"Follow, shake, zoom",you:"R",dev2:"C",d1:"C",d2:"I",d3:"I"},
+    ]
+  },
+  {
+    cat:"Development — systems & integration",
+    rows:[
+      {task:"UI system implementation",note:"HUD, menus, health bar in Unity",you:"C",dev2:"R",d1:"I",d2:"I",d3:"C"},
+      {task:"Audio integration",note:"Wiring sound FX and music in Unity",you:"I",dev2:"R",d1:"I",d2:"I",d3:"C"},
+      {task:"Scene management",note:"Scene loader, transitions",you:"C",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"Asset import pipeline",note:"Sprites, animations, audio",you:"I",dev2:"R",d1:"C",d2:"C",d3:"C"},
+      {task:"Build pipeline",note:"Friday builds, platform targets",you:"A",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"Analytics / crash reporting",note:"GameAnalytics SDK",you:"A",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"Performance optimisation",note:"Frame rate, memory, mobile",you:"C",dev2:"R",d1:"I",d2:"I",d3:"I"},
+    ]
+  },
+  {
+    cat:"Art & character design",
+    rows:[
+      {task:"Style bible",note:"Palette, line weights, reference boards",you:"A",dev2:"I",d1:"R",d2:"C",d3:"C"},
+      {task:"Amari character design",note:"Final hero sheet",you:"C",dev2:"I",d1:"R",d2:"I",d3:"I"},
+      {task:"Enemy character designs",note:"Soldiers, bosses, all tiers",you:"C",dev2:"I",d1:"R",d2:"C",d3:"I"},
+      {task:"Amari animation frames",note:"Idle, run, jump, attack, death",you:"C",dev2:"I",d1:"R",d2:"I",d3:"I"},
+      {task:"Enemy animation frames",note:"All enemy types",you:"C",dev2:"I",d1:"R",d2:"C",d3:"I"},
+      {task:"VFX sprites",note:"Blood, particles, dash trail, summons",you:"C",dev2:"I",d1:"R",d2:"C",d3:"I"},
+      {task:"Art QA — style consistency",note:"Monthly review against style bible",you:"I",dev2:"I",d1:"A",d2:"R",d3:"I"},
+    ]
+  },
+  {
+    cat:"Environment & level art",
+    rows:[
+      {task:"Level layout mockups",note:"Box diagrams in Miro per level",you:"A",dev2:"I",d1:"C",d2:"R",d3:"I"},
+      {task:"Tilesets per act",note:"Ground, platforms, walls per region",you:"I",dev2:"C",d1:"C",d2:"R",d3:"I"},
+      {task:"Background art",note:"Parallax layers per level",you:"I",dev2:"C",d1:"C",d2:"R",d3:"I"},
+      {task:"Environmental props",note:"Trees, rocks, fire, water",you:"I",dev2:"I",d1:"C",d2:"R",d3:"I"},
+      {task:"Asset handoff to /READY-FOR-DEV",note:"Correctly named, correct format",you:"I",dev2:"C",d1:"I",d2:"R",d3:"I"},
+    ]
+  },
+  {
+    cat:"UI design & sound",
+    rows:[
+      {task:"Main menu design",note:"Visual layout, buttons",you:"C",dev2:"I",d1:"C",d2:"I",d3:"R"},
+      {task:"HUD design",note:"Health, score, ability indicators",you:"C",dev2:"C",d1:"C",d2:"I",d3:"R"},
+      {task:"Game-over & pause screens",note:"",you:"C",dev2:"I",d1:"I",d2:"I",d3:"R"},
+      {task:"Icon design",note:"Weapons, abilities, collectibles",you:"I",dev2:"I",d1:"C",d2:"I",d3:"R"},
+      {task:"Sound FX sourcing & editing",note:"Combat, ambient, UI",you:"I",dev2:"C",d1:"I",d2:"I",d3:"R"},
+      {task:"Music sourcing / direction",note:"Per-act music brief",you:"A",dev2:"I",d1:"C",d2:"I",d3:"R"},
+    ]
+  },
+  {
+    cat:"Playtesting & QA",
+    rows:[
+      {task:"Internal Friday playtest",note:"Whole team, written feedback first",you:"A",dev2:"R",d1:"R",d2:"R",d3:"R"},
+      {task:"External playtest sessions",note:"10+ strangers per phase",you:"A",dev2:"C",d1:"I",d2:"I",d3:"C"},
+      {task:"Bug triage",note:"Prioritising reported issues",you:"A",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"Bug fixing — code",note:"",you:"R",dev2:"R",d1:"I",d2:"I",d3:"I"},
+      {task:"Bug fixing — art/audio",note:"",you:"I",dev2:"I",d1:"R",d2:"R",d3:"R"},
+      {task:"Platform certification",note:"Google Play / App Store / Steam",you:"A",dev2:"R",d1:"I",d2:"I",d3:"I"},
+    ]
+  },
+  {
+    cat:"Launch & marketing",
+    rows:[
+      {task:"Store page copy",note:"Description, genre, keywords",you:"R",dev2:"I",d1:"C",d2:"I",d3:"C"},
+      {task:"Screenshots & key art",note:"Store listing visuals",you:"A",dev2:"I",d1:"C",d2:"C",d3:"R"},
+      {task:"Game trailer",note:"Editing, pacing, captions",you:"A",dev2:"I",d1:"C",d2:"I",d3:"R"},
+      {task:"Press kit",note:"One-sheet, logo pack, screenshots",you:"A",dev2:"I",d1:"C",d2:"I",d3:"R"},
+      {task:"Social media assets",note:"Announcement, GIFs, posts",you:"A",dev2:"I",d1:"C",d2:"I",d3:"R"},
+      {task:"Dev log / public documentation",note:"Twitter/X or YouTube dev updates",you:"R",dev2:"C",d1:"C",d2:"I",d3:"C"},
+    ]
+  }
+];
+
+const RACI_COLORS = {R:'r-R',A:'r-A',C:'r-C',I:'r-I','':'r-'};
+const MEMBERS = ['you','dev2','d1','d2','d3'];
+
+let activeFilter = 'all';
+
+function buildTable() {
+  const tbody = document.getElementById('raci-body');
+  tbody.innerHTML = '';
+  CATS.forEach(cat => {
+    const catTr = document.createElement('tr');
+    catTr.className = 'cat-row';
+    catTr.dataset.cat = cat.cat;
+    catTr.innerHTML = `<td colspan="6">${cat.cat}</td>`;
+    tbody.appendChild(catTr);
+    cat.rows.forEach(row => {
+      const tr = document.createElement('tr');
+      tr.className = 'data-row';
+      tr.dataset.you = row.you;
+      tr.dataset.dev2 = row.dev2;
+      tr.dataset.d1 = row.d1;
+      tr.dataset.d2 = row.d2;
+      tr.dataset.d3 = row.d3;
+      const vals = [row.you, row.dev2, row.d1, row.d2, row.d3];
+      const cells = vals.map(v => `<td class="cell"><div class="chip ${RACI_COLORS[v]||'r-'}">${v||''}</div></td>`).join('');
+      tr.innerHTML = `<td><div class="task-name">${row.task}</div>${row.note?`<div class="task-note">${row.note}</div>`:''}</td>${cells}`;
+      tbody.appendChild(tr);
+    });
+  });
+  applyFilter();
+  buildSummary();
+}
+
+function applyFilter() {
+  const rows = document.querySelectorAll('#raci-body tr.data-row');
+  rows.forEach(tr => {
+    if (activeFilter === 'all') { tr.classList.remove('hidden'); return; }
+    const val = tr.dataset[activeFilter];
+    tr.classList.toggle('hidden', val === '' || val === undefined || val === '-');
+  });
+  const catRows = document.querySelectorAll('#raci-body tr.cat-row');
+  catRows.forEach(catTr => {
+    let next = catTr.nextElementSibling;
+    let anyVisible = false;
+    while (next && next.classList.contains('data-row')) {
+      if (!next.classList.contains('hidden')) anyVisible = true;
+      next = next.nextElementSibling;
+    }
+    catTr.classList.toggle('hidden', !anyVisible);
+  });
+}
+
+function filterPerson(person, btn) {
+  activeFilter = person;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  applyFilter();
+}
+
+function buildSummary() {
+  const names = ['You','Dev 2','D1','D2','D3'];
+  const keys = ['you','dev2','d1','d2','d3'];
+  const avCls = ['av-you','av-dev2','av-d1','av-d2','av-d3'];
+  const counts = keys.map(() => ({R:0,A:0,C:0,I:0}));
+  CATS.forEach(cat => cat.rows.forEach(row => {
+    keys.forEach((k,i) => { const v = row[k]; if(v && counts[i][v]!==undefined) counts[i][v]++; });
+  }));
+  const bar = document.getElementById('summary-bar');
+  bar.innerHTML = keys.map((k,i) => `
+    <div class="sum-card">
+      <div class="sum-name"><span class="avatar ${avCls[i]}" style="display:inline-flex;width:18px;height:18px;font-size:8px;vertical-align:middle;margin-right:4px">${names[i].substring(0,3)}</span>${names[i]}</div>
+      <div class="sum-row"><span class="sum-lbl"><span class="dot r-R" style="display:inline-flex;width:14px;height:14px;font-size:9px;margin-right:3px">R</span>Responsible</span><span class="sum-val">${counts[i].R}</span></div>
+      <div class="sum-row"><span class="sum-lbl"><span class="dot r-A" style="display:inline-flex;width:14px;height:14px;font-size:9px;margin-right:3px">A</span>Accountable</span><span class="sum-val">${counts[i].A}</span></div>
+      <div class="sum-row"><span class="sum-lbl"><span class="dot r-C" style="display:inline-flex;width:14px;height:14px;font-size:9px;margin-right:3px">C</span>Consulted</span><span class="sum-val">${counts[i].C}</span></div>
+      <div class="sum-row"><span class="sum-lbl"><span class="dot r-I" style="display:inline-flex;width:14px;height:14px;font-size:9px;margin-right:3px">I</span>Informed</span><span class="sum-val">${counts[i].I}</span></div>
+    </div>`).join('');
+}
+
+buildTable();
+</script>
