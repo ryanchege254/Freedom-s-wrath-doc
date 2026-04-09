@@ -1,0 +1,755 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.root{padding:1rem 0;font-family:var(--font-sans)}
+.phase-nav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1.25rem}
+.ph-btn{padding:6px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:12px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary);transition:all .15s}
+.ph-btn:hover{background:var(--color-background-secondary)}
+.ph-btn.active{background:#534AB7;color:#EEEDFE;border-color:#534AB7}
+.mech-list{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
+.mech-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden;background:var(--color-background-primary)}
+.mech-head{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.mech-head:hover{background:var(--color-background-secondary)}
+.mech-num{width:24px;height:24px;border-radius:50%;font-size:11px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.mech-info{flex:1}
+.mech-name{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.mech-tag-row{margin-top:3px;display:flex;gap:4px;flex-wrap:wrap}
+.mtag{font-size:10px;padding:1px 7px;border-radius:20px}
+.mech-body{display:none;padding:0 14px 14px;border-top:0.5px solid var(--color-border-tertiary)}
+.mech-body.open{display:block}
+.code-block{font-family:var(--font-mono);font-size:11.5px;background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-md);line-height:1.8;margin:10px 0;overflow-x:auto;white-space:pre}
+.kw{color:#534AB7}.type{color:#0F6E56}.str{color:#854F0B}.comment{color:var(--color-text-tertiary)}.val{color:#3C3489}
+.insight{background:#EEEDFE;border-radius:var(--border-radius-md);padding:10px 12px;margin:8px 0;font-size:12px;color:#3C3489;line-height:1.5}
+.insight-lbl{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#534AB7;margin-bottom:2px}
+.warn{background:#FAEEDA;border-radius:var(--border-radius-md);padding:10px 12px;margin:8px 0;font-size:12px;color:#633806;line-height:1.5}
+.warn-lbl{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#854F0B;margin-bottom:2px}
+.good{background:#E1F5EE;border-radius:var(--border-radius-md);padding:10px 12px;margin:8px 0;font-size:12px;color:#085041;line-height:1.5}
+.good-lbl{font-size:10px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:#0F6E56;margin-bottom:2px}
+.sec-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin:12px 0 4px}
+.sec-body{font-size:12px;color:var(--color-text-secondary);line-height:1.6;margin-bottom:8px}
+.phase-intro{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px;margin-bottom:14px;background:var(--color-background-secondary)}
+.pi-title{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.pi-body{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.chevron{display:inline-block;transition:transform .2s;font-size:12px;color:var(--color-text-tertiary)}
+.chevron.open{transform:rotate(90deg)}
+</style>
+
+<div class="root">
+<h2 class="sr-only">Core mechanics tutorial for Freedom's Wrath in Unity — 4 phases from beginner to professional covering player movement, combat, enemy AI, and advanced systems</h2>
+
+<div class="phase-nav">
+  <button class="ph-btn active" onclick="showPhase(0,this)">Phase 1 — Beginner</button>
+  <button class="ph-btn" onclick="showPhase(1,this)">Phase 2 — Intermediate</button>
+  <button class="ph-btn" onclick="showPhase(2,this)">Phase 3 — Advanced</button>
+  <button class="ph-btn" onclick="showPhase(3,this)">Phase 4 — Professional</button>
+</div>
+
+<div id="phase-container"></div>
+</div>
+
+<script>
+const PHASES = [
+  {
+    label:"Phase 1 — Beginner",
+    intro:"Start here. Build a grey-box character that moves, jumps, and collides with platforms. No art, no combat. The goal is a satisfying movement feel — this is the most important phase because if movement doesn't feel good, nothing else matters.",
+    color:"#534AB7",textColor:"#EEEDFE",numBg:"#EEEDFE",numColor:"#3C3489",
+    mechs:[
+      {
+        name:"1.1 — Project setup and the Rigidbody2D decision",
+        tags:[{t:"Setup",c:"#EEEDFE/#3C3489"},{t:"Physics",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"What to do first",body:"Create a new Unity 2022 LTS project (2D Core template). Install: Cinemachine, Input System (new), TextMeshPro. In Project Settings → Physics 2D, set Gravity to -30 (not the default -9.8). Real-world gravity feels floaty in a 2D platformer — -25 to -35 is the standard range."},
+          {title:"The Rigidbody2D configuration",body:"Add Rigidbody2D to your player GameObject. Set Collision Detection to Continuous (not Discrete — prevents passing through thin platforms at speed). Set Interpolate to Interpolate — smooths movement between physics steps."},
+        ],
+        code:`<span class="comment">// PlayerController.cs — the foundation script</span>
+<span class="comment">// Attach this to your Amari GameObject</span>
+
+<span class="kw">using</span> UnityEngine;
+<span class="kw">using</span> UnityEngine.InputSystem;
+
+<span class="kw">public class</span> <span class="type">PlayerController</span> : MonoBehaviour
+{
+    <span class="comment">// Inspector-tunable values — your designer can see these</span>
+    [Header(<span class="str">"Movement"</span>)]
+    [SerializeField] <span class="kw">float</span> moveSpeed = <span class="val">8f</span>;
+    [SerializeField] <span class="kw">float</span> jumpForce = <span class="val">16f</span>;
+
+    <span class="type">Rigidbody2D</span> rb;
+    <span class="type">Vector2</span> moveInput;
+    <span class="kw">bool</span> isGrounded;
+
+    <span class="kw">void</span> Awake()
+    {
+        rb = GetComponent<<span class="type">Rigidbody2D</span>>();
+    }
+
+    <span class="comment">// Called by Unity's Input System (new)</span>
+    <span class="kw">public void</span> OnMove(<span class="type">InputValue</span> value)
+    {
+        moveInput = value.Get<<span class="type">Vector2</span>>();
+    }
+
+    <span class="kw">public void</span> OnJump(<span class="type">InputValue</span> value)
+    {
+        <span class="kw">if</span> (value.isPressed && isGrounded)
+            rb.velocity = <span class="kw">new</span> <span class="type">Vector2</span>(rb.velocity.x, jumpForce);
+    }
+
+    <span class="kw">void</span> FixedUpdate()
+    {
+        <span class="comment">// Only control horizontal — let physics handle vertical</span>
+        rb.velocity = <span class="kw">new</span> <span class="type">Vector2</span>(moveInput.x * moveSpeed, rb.velocity.y);
+    }
+}`,
+        insight:{label:"Design insight",text:"Expose every number in the Inspector with [SerializeField]. This lets you — and eventually Dev 2 — tune movement feel without touching code. The Celeste team spent weeks adjusting gravity, jump force, and move speed values. Having them in the Inspector makes that iteration instant."}
+      },
+      {
+        name:"1.2 — Ground detection (the right way)",
+        tags:[{t:"Physics",c:"#E1F5EE/#085041"},{t:"Collision",c:"#FAEEDA/#633806"}],
+        sections:[
+          {title:"Why not OnCollisionEnter2D?",body:"Beginners use OnCollisionEnter2D to detect the ground. This breaks on slopes, ledge edges, and multi-tile platforms. The professional approach is a GroundCheck — a small Physics2D.OverlapCircle cast downward from the player's feet."},
+        ],
+        code:`<span class="comment">// Add to PlayerController.cs</span>
+
+[Header(<span class="str">"Ground Check"</span>)]
+[SerializeField] <span class="type">Transform</span> groundCheck;        <span class="comment">// empty child object at feet</span>
+[SerializeField] <span class="kw">float</span> groundCheckRadius = <span class="val">0.15f</span>;
+[SerializeField] <span class="type">LayerMask</span> groundLayer;       <span class="comment">// assign "Ground" layer in Inspector</span>
+
+<span class="kw">void</span> Update()
+{
+    <span class="comment">// Overlap circle at feet — true if touching any Ground layer collider</span>
+    isGrounded = Physics2D.<span class="type">OverlapCircle</span>(
+        groundCheck.position,
+        groundCheckRadius,
+        groundLayer
+    );
+}
+
+<span class="comment">// In Unity Editor:</span>
+<span class="comment">// 1. Create empty child GameObject on Amari, name it "GroundCheck"</span>
+<span class="comment">// 2. Position it just below feet (y offset of about -0.5)</span>
+<span class="comment">// 3. Create a Layer called "Ground", assign all platform tilemaps to it</span>
+<span class="comment">// 4. Drag the "Ground" layer into groundLayer in the Inspector</span>`,
+        warn:{label:"Common beginner mistake",text:"Setting the GroundCheck radius too large causes the player to 'stick' to walls — the circle overlaps wall colliders as well as floor colliders. Keep the radius small (0.1–0.2) and position the GroundCheck precisely at the sole of the foot, not at the centre of the character."}
+      },
+      {
+        name:"1.3 — Coyote time and jump buffering",
+        tags:[{t:"Game feel",c:"#EEEDFE/#3C3489"},{t:"Polish",c:"#FAECE7/#993C1D"}],
+        sections:[
+          {title:"What are these?",body:"Coyote time: the player can jump for ~0.1s after walking off a ledge. Without it, jumps feel unresponsive at ledge edges — the player steps off and can't jump. Jump buffer: if the player presses jump ~0.1s before landing, the jump registers. Without it, pressing jump a fraction early feels like a missed input. Both are invisible mechanics that make movement feel 'tight'."},
+        ],
+        code:`<span class="comment">// Add to PlayerController.cs</span>
+
+[Header(<span class="str">"Jump Feel"</span>)]
+[SerializeField] <span class="kw">float</span> coyoteTime = <span class="val">0.15f</span>;
+[SerializeField] <span class="kw">float</span> jumpBufferTime = <span class="val">0.1f</span>;
+
+<span class="kw">float</span> coyoteTimeCounter;
+<span class="kw">float</span> jumpBufferCounter;
+
+<span class="kw">void</span> Update()
+{
+    isGrounded = Physics2D.<span class="type">OverlapCircle</span>(groundCheck.position, groundCheckRadius, groundLayer);
+
+    <span class="comment">// Coyote time — count down when airborne</span>
+    <span class="kw">if</span> (isGrounded) coyoteTimeCounter = coyoteTime;
+    <span class="kw">else</span> coyoteTimeCounter -= Time.deltaTime;
+
+    <span class="comment">// Jump buffer — count down after jump pressed</span>
+    <span class="kw">if</span> (jumpBufferCounter > <span class="val">0f</span>) jumpBufferCounter -= Time.deltaTime;
+
+    <span class="comment">// Attempt jump when buffer active and coyote time valid</span>
+    <span class="kw">if</span> (jumpBufferCounter > <span class="val">0f</span> && coyoteTimeCounter > <span class="val">0f</span>)
+    {
+        rb.velocity = <span class="kw">new</span> <span class="type">Vector2</span>(rb.velocity.x, jumpForce);
+        jumpBufferCounter = <span class="val">0f</span>;
+    }
+
+    <span class="comment">// Variable jump height — release early = lower jump</span>
+    <span class="kw">if</span> (!jumpHeld && rb.velocity.y > <span class="val">0f</span>)
+        rb.velocity += <span class="type">Vector2</span>.up * Physics2D.gravity.y * <span class="val">2f</span> * Time.deltaTime;
+}
+
+<span class="kw">bool</span> jumpHeld;
+<span class="kw">public void</span> OnJump(<span class="type">InputValue</span> value)
+{
+    jumpHeld = value.isPressed;
+    <span class="kw">if</span> (value.isPressed) jumpBufferCounter = jumpBufferTime;
+}`,
+        insight:{label:"Why Celeste feels amazing",text:"Celeste implements both of these plus 12 other 'invisible' feel improvements — early jump descent, apex floatiness, directional air control. The player never notices them. They only notice if they're missing. Every professional 2D platformer has these. Implement them before showing anyone the game."}
+      }
+    ]
+  },
+  {
+    label:"Phase 2 — Intermediate",
+    intro:"Your player moves well. Now add combat, a dash ability, camera, and the first enemy. Each system should be its own script — never one giant PlayerController that does everything.",
+    color:"#0F6E56",textColor:"#E1F5EE",numBg:"#E1F5EE",numColor:"#085041",
+    mechs:[
+      {
+        name:"2.1 — The dash mechanic",
+        tags:[{t:"Ability",c:"#EEEDFE/#3C3489"},{t:"Cooldown",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"How dashes work in professional games",body:"A dash is a burst of velocity in the movement direction with a brief invincibility window. Three things make it feel good: (1) a brief freeze frame at the start (0.05s), (2) a trail VFX showing the path, (3) a clear cooldown indicator so the player knows when it's ready. Separate DashController.cs from PlayerController.cs — this keeps each system testable independently."},
+        ],
+        code:`<span class="comment">// DashController.cs — attach alongside PlayerController</span>
+
+<span class="kw">public class</span> <span class="type">DashController</span> : MonoBehaviour
+{
+    [SerializeField] <span class="kw">float</span> dashSpeed = <span class="val">20f</span>;
+    [SerializeField] <span class="kw">float</span> dashDuration = <span class="val">0.15f</span>;
+    [SerializeField] <span class="kw">float</span> dashCooldown = <span class="val">0.8f</span>;
+    [SerializeField] <span class="type">TrailRenderer</span> dashTrail;
+
+    <span class="type">Rigidbody2D</span> rb;
+    <span class="type">PlayerController</span> player;
+    <span class="kw">bool</span> isDashing, canDash = <span class="kw">true</span>;
+    <span class="kw">float</span> dashDirection;
+
+    <span class="kw">void</span> Awake()
+    {
+        rb = GetComponent<<span class="type">Rigidbody2D</span>>();
+        player = GetComponent<<span class="type">PlayerController</span>>();
+    }
+
+    <span class="kw">public void</span> OnDash(<span class="type">InputValue</span> value)
+    {
+        <span class="kw">if</span> (value.isPressed && canDash && !isDashing)
+            StartCoroutine(PerformDash());
+    }
+
+    <span class="type">IEnumerator</span> PerformDash()
+    {
+        canDash = <span class="kw">false</span>;
+        isDashing = <span class="kw">true</span>;
+        dashDirection = player.FacingDirection; <span class="comment">// get from PlayerController</span>
+
+        <span class="comment">// Brief freeze frame — feels punchy</span>
+        Time.timeScale = <span class="val">0.05f</span>;
+        <span class="kw">yield return new</span> WaitForSecondsRealtime(<span class="val">0.04f</span>);
+        Time.timeScale = <span class="val">1f</span>;
+
+        rb.gravityScale = <span class="val">0f</span>;   <span class="comment">// ignore gravity during dash</span>
+        rb.velocity = <span class="kw">new</span> <span class="type">Vector2</span>(dashDirection * dashSpeed, <span class="val">0f</span>);
+        <span class="kw">if</span> (dashTrail) dashTrail.emitting = <span class="kw">true</span>;
+
+        <span class="kw">yield return new</span> WaitForSeconds(dashDuration);
+
+        rb.gravityScale = <span class="val">3f</span>;  <span class="comment">// restore gravity</span>
+        rb.velocity = <span class="type">Vector2</span>.zero;
+        isDashing = <span class="kw">false</span>;
+        <span class="kw">if</span> (dashTrail) dashTrail.emitting = <span class="kw">false</span>;
+
+        <span class="kw">yield return new</span> WaitForSeconds(dashCooldown);
+        canDash = <span class="kw">true</span>;
+    }
+
+    <span class="kw">public bool</span> IsDashing => isDashing; <span class="comment">// expose for other systems</span>
+}`,
+        warn:{label:"Unity gotcha",text:"Setting Time.timeScale to 0 pauses the entire game including your coroutine — use WaitForSecondsRealtime instead of WaitForSeconds for any delay inside the freeze frame. This is one of the most common beginner bugs with slow-motion effects in Unity."}
+      },
+      {
+        name:"2.2 — Cinemachine camera setup",
+        tags:[{t:"Camera",c:"#FAEEDA/#633806"},{t:"Cinemachine",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"Why Cinemachine instead of scripting a camera",body:"A hand-coded follow camera takes hours to get right and still feels worse than Cinemachine's built-in damping, dead zones, and look-ahead. Cinemachine is used in professional games — configure it through the Inspector, no code needed."},
+          {title:"Setup steps in Unity",body:"1. Install Cinemachine via Package Manager. 2. In your scene: Create → Cinemachine → 2D Camera. 3. Drag Amari into the Follow field. 4. Set Lookahead Time to 0.3 — camera leads slightly in the movement direction. 5. Set Dead Zone Width to 0.5 — small dead zone so minor jitter doesn't move the camera."},
+        ],
+        code:`<span class="comment">// CameraController.cs — add screen shake, nothing else</span>
+<span class="comment">// Cinemachine handles following. This handles impulse.</span>
+
+<span class="kw">using</span> Cinemachine;
+
+<span class="kw">public class</span> <span class="type">CameraController</span> : MonoBehaviour
+{
+    <span class="kw">public static</span> <span class="type">CameraController</span> Instance;
+    [SerializeField] <span class="type">CinemachineImpulseSource</span> impulseSource;
+
+    <span class="kw">void</span> Awake() => Instance = <span class="kw">this</span>;
+
+    <span class="comment">// Call from anywhere: CameraController.Instance.Shake(0.3f)</span>
+    <span class="kw">public void</span> Shake(<span class="kw">float</span> force = <span class="val">0.3f</span>)
+    {
+        impulseSource.GenerateImpulse(force);
+    }
+}
+
+<span class="comment">// Usage example — in PlayerCombat.cs when landing a hit:</span>
+<span class="comment">// CameraController.Instance.Shake(0.2f);</span>`,
+        insight:{label:"Screen shake is juice",text:"'Game juice' is the collection of micro-feedback effects that make an action feel impactful: screen shake, hit pause, particle burst, sound FX, controller rumble. Adding screen shake on every hit is the single highest-return polish addition in 2D action games. Start with it at 0.15f intensity and tune from there."}
+      },
+      {
+        name:"2.3 — Melee combat system",
+        tags:[{t:"Combat",c:"#FAECE7/#993C1D"},{t:"Hitbox",c:"#EEEDFE/#3C3489"}],
+        sections:[
+          {title:"The hitbox architecture",body:"Combat in professional 2D games uses Physics2D.OverlapBox or OverlapCircle rather than trigger colliders on weapons. This gives precise, frame-perfect control over when and where damage is checked. Trigger colliders on swords clip through walls and can hit enemies mid-backswing."},
+        ],
+        code:`<span class="comment">// PlayerCombat.cs</span>
+
+<span class="kw">public class</span> <span class="type">PlayerCombat</span> : MonoBehaviour
+{
+    [Header(<span class="str">"Attack"</span>)]
+    [SerializeField] <span class="type">Transform</span> attackPoint;      <span class="comment">// child object in front of player</span>
+    [SerializeField] <span class="kw">float</span> attackRange = <span class="val">0.6f</span>;
+    [SerializeField] <span class="kw">int</span> attackDamage = <span class="val">20</span>;
+    [SerializeField] <span class="kw">float</span> attackCooldown = <span class="val">0.4f</span>;
+    [SerializeField] <span class="type">LayerMask</span> enemyLayer;
+
+    [Header(<span class="str">"Combo"</span>)]
+    [SerializeField] <span class="kw">float</span> comboWindow = <span class="val">0.6f</span>;     <span class="comment">// time to chain next hit</span>
+    <span class="kw">int</span> comboCount;
+    <span class="kw">float</span> lastAttackTime;
+    <span class="kw">bool</span> canAttack = <span class="kw">true</span>;
+
+    <span class="kw">public void</span> OnAttack(<span class="type">InputValue</span> value)
+    {
+        <span class="kw">if</span> (!value.isPressed || !canAttack) <span class="kw">return</span>;
+
+        <span class="comment">// Advance or reset combo</span>
+        comboCount = (Time.time - lastAttackTime < comboWindow)
+            ? Mathf.Min(comboCount + <span class="val">1</span>, <span class="val">3</span>) : <span class="val">1</span>;
+        lastAttackTime = Time.time;
+
+        StartCoroutine(AttackRoutine());
+    }
+
+    <span class="type">IEnumerator</span> AttackRoutine()
+    {
+        canAttack = <span class="kw">false</span>;
+        <span class="kw">float</span> damageMultiplier = comboCount == <span class="val">3</span> ? <span class="val">2f</span> : <span class="val">1f</span>; <span class="comment">// combo finisher</span>
+
+        <span class="comment">// Hit pause — freeze frame on the hit frame</span>
+        Time.timeScale = <span class="val">0.05f</span>;
+        <span class="kw">yield return new</span> WaitForSecondsRealtime(<span class="val">0.04f</span>);
+        Time.timeScale = <span class="val">1f</span>;
+
+        <span class="comment">// Check for enemies in attack range</span>
+        <span class="type">Collider2D</span>[] hits = Physics2D.OverlapCircleAll(
+            attackPoint.position, attackRange, enemyLayer);
+
+        <span class="kw">foreach</span> (<span class="kw">var</span> hit <span class="kw">in</span> hits)
+        {
+            <span class="kw">if</span> (hit.TryGetComponent<<span class="type">EnemyHealth</span>>(out <span class="kw">var</span> enemy))
+            {
+                enemy.TakeDamage((<span class="kw">int</span>)(attackDamage * damageMultiplier));
+                CameraController.Instance.Shake(<span class="val">0.2f</span>);
+            }
+        }
+
+        <span class="kw">yield return new</span> WaitForSeconds(attackCooldown);
+        canAttack = <span class="kw">true</span>;
+    }
+}`,
+        warn:{label:"Hitbox visualisation",text:"Always visualise your hitboxes during development. Add OnDrawGizmosSelected() with Gizmos.DrawWireSphere(attackPoint.position, attackRange) to see exactly what the hit check covers. Players complain about 'phantom hits' or 'missed attacks' because the developer never saw what the hitbox actually covers."}
+      },
+      {
+        name:"2.4 — First enemy AI (patrol and detect)",
+        tags:[{t:"AI",c:"#FAECE7/#993C1D"},{t:"State machine",c:"#EEEDFE/#3C3489"}],
+        sections:[
+          {title:"The state machine pattern",body:"Every enemy needs a simple state machine: Patrol → Detect → Chase → Attack → Return. Each state has clear entry and exit conditions. Never use if/else chains for this — they grow unmanageable. Use an enum and switch statement as a minimal state machine. This pattern scales to boss AI without structural changes."},
+        ],
+        code:`<span class="comment">// SoldierAI.cs — colonial soldier base behaviour</span>
+
+<span class="kw">public class</span> <span class="type">SoldierAI</span> : MonoBehaviour
+{
+    <span class="kw">enum</span> <span class="type">State</span> { Patrol, Chase, Attack, Return }
+    <span class="type">State</span> currentState = <span class="type">State</span>.Patrol;
+
+    [SerializeField] <span class="kw">float</span> patrolSpeed = <span class="val">2f</span>;
+    [SerializeField] <span class="kw">float</span> chaseSpeed = <span class="val">4f</span>;
+    [SerializeField] <span class="kw">float</span> detectionRange = <span class="val">6f</span>;
+    [SerializeField] <span class="kw">float</span> attackRange = <span class="val">1.2f</span>;
+    [SerializeField] <span class="type">Transform</span>[] patrolPoints;
+
+    <span class="type">Transform</span> player;
+    <span class="type">Rigidbody2D</span> rb;
+    <span class="kw">int</span> currentPatrolIndex;
+    <span class="type">Vector3</span> startPosition;
+
+    <span class="kw">void</span> Awake()
+    {
+        rb = GetComponent<<span class="type">Rigidbody2D</span>>();
+        player = <span class="type">GameObject</span>.FindGameObjectWithTag(<span class="str">"Player"</span>).transform;
+        startPosition = transform.position;
+    }
+
+    <span class="kw">void</span> Update()
+    {
+        <span class="kw">float</span> distToPlayer = <span class="type">Vector2</span>.Distance(transform.position, player.position);
+
+        <span class="kw">switch</span> (currentState)
+        {
+            <span class="kw">case</span> <span class="type">State</span>.Patrol:
+                Patrol();
+                <span class="kw">if</span> (distToPlayer < detectionRange) TransitionTo(<span class="type">State</span>.Chase);
+                <span class="kw">break</span>;
+
+            <span class="kw">case</span> <span class="type">State</span>.Chase:
+                MoveTowards(player.position, chaseSpeed);
+                <span class="kw">if</span> (distToPlayer < attackRange)  TransitionTo(<span class="type">State</span>.Attack);
+                <span class="kw">if</span> (distToPlayer > detectionRange * <span class="val">1.5f</span>) TransitionTo(<span class="type">State</span>.Return);
+                <span class="kw">break</span>;
+
+            <span class="kw">case</span> <span class="type">State</span>.Attack:
+                <span class="comment">// Trigger attack animation — handled in EnemyCombat.cs</span>
+                <span class="kw">if</span> (distToPlayer > attackRange) TransitionTo(<span class="type">State</span>.Chase);
+                <span class="kw">break</span>;
+
+            <span class="kw">case</span> <span class="type">State</span>.Return:
+                MoveTowards(startPosition, patrolSpeed);
+                <span class="kw">if</span> (<span class="type">Vector2</span>.Distance(transform.position, startPosition) < <span class="val">0.2f</span>)
+                    TransitionTo(<span class="type">State</span>.Patrol);
+                <span class="kw">break</span>;
+        }
+    }
+
+    <span class="kw">void</span> TransitionTo(<span class="type">State</span> next) => currentState = next;
+
+    <span class="kw">void</span> Patrol()
+    {
+        <span class="kw">if</span> (patrolPoints.Length == <span class="val">0</span>) <span class="kw">return</span>;
+        <span class="kw">var</span> target = patrolPoints[currentPatrolIndex].position;
+        MoveTowards(target, patrolSpeed);
+        <span class="kw">if</span> (<span class="type">Vector2</span>.Distance(transform.position, target) < <span class="val">0.2f</span>)
+            currentPatrolIndex = (currentPatrolIndex + <span class="val">1</span>) % patrolPoints.Length;
+    }
+
+    <span class="kw">void</span> MoveTowards(<span class="type">Vector3</span> target, <span class="kw">float</span> speed)
+    {
+        <span class="kw">float</span> dir = target.x > transform.position.x ? <span class="val">1f</span> : <span class="val">-1f</span>;
+        rb.velocity = <span class="kw">new</span> <span class="type">Vector2</span>(dir * speed, rb.velocity.y);
+        transform.localScale = <span class="kw">new</span> <span class="type">Vector3</span>(dir, <span class="val">1f</span>, <span class="val">1f</span>); <span class="comment">// flip sprite</span>
+    }
+}`
+      }
+    ]
+  },
+  {
+    label:"Phase 3 — Advanced",
+    intro:"Your game is playable. Now build the systems that turn a prototype into a real game: ScriptableObject data, the ability system, boss architecture, and the save/checkpoint system.",
+    color:"#854F0B",textColor:"#FAEEDA",numBg:"#FAEEDA",numColor:"#633806",
+    mechs:[
+      {
+        name:"3.1 — ScriptableObject data architecture",
+        tags:[{t:"Architecture",c:"#EEEDFE/#3C3489"},{t:"Designer-friendly",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"What ScriptableObjects do for your team",body:"A ScriptableObject is a data container that lives as an asset in your project. Instead of hardcoding enemy health values in SoldierAI.cs, you create a SoldierStatsSO asset. Dev 2 can tune values in the Inspector without opening a script. Your designers can create new enemy variants by duplicating an asset — no code."},
+        ],
+        code:`<span class="comment">// EnemyStatsSO.cs — a data container, not a MonoBehaviour</span>
+
+[<span class="type">CreateAssetMenu</span>(fileName = <span class="str">"NewEnemyStats"</span>, menuName = <span class="str">"FreedomsWrath/Enemy Stats"</span>)]
+<span class="kw">public class</span> <span class="type">EnemyStatsSO</span> : ScriptableObject
+{
+    <span class="kw">public string</span> enemyName;
+    <span class="kw">public int</span> maxHealth = <span class="val">100</span>;
+    <span class="kw">public float</span> moveSpeed = <span class="val">3f</span>;
+    <span class="kw">public float</span> detectionRange = <span class="val">6f</span>;
+    <span class="kw">public int</span> attackDamage = <span class="val">15</span>;
+    <span class="kw">public float</span> attackCooldown = <span class="val">1.2f</span>;
+    <span class="kw">public float</span> knockbackForce = <span class="val">5f</span>;
+    <span class="kw">public</span> <span class="type">Sprite</span> portrait;                <span class="comment">// for UI — designers assign</span>
+}
+
+<span class="comment">// Then in SoldierAI.cs, replace hardcoded values:</span>
+[SerializeField] <span class="type">EnemyStatsSO</span> stats;
+
+<span class="kw">void</span> Start()
+{
+    moveSpeed = stats.moveSpeed;
+    detectionRange = stats.detectionRange;
+    <span class="comment">// etc — all from the asset</span>
+}
+
+<span class="comment">// Create assets: Right-click in Project → FreedomsWrath → Enemy Stats</span>
+<span class="comment">// Result: Soldier_Basic.asset, Soldier_Elite.asset, Boss_Governor.asset</span>
+<span class="comment">// Dev 2 can balance all enemies by editing these assets — no code changes</span>`,
+        insight:{label:"The Hollow Knight pattern",text:"Team Cherry used this data architecture for every enemy, weapon, and item in the game. The composer could adjust values without a programmer present. Your D3 designer can create a new 'Elite Zouave' enemy variant for Level 16 by duplicating the SoldierElite.asset and changing three numbers. No PR, no code review needed."}
+      },
+      {
+        name:"3.2 — The ability system (Spirit Sight, Shadow, Summon)",
+        tags:[{t:"Abilities",c:"#EEEDFE/#3C3489"},{t:"Extensible",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"Abstract base class pattern",body:"Freedom's Wrath has 4+ abilities. If you hardcode each one in PlayerController.cs, that script becomes 800 lines. Instead, create an abstract PlayerAbility base class. Each ability is a separate script that inherits from it. Adding a new ability = new script, nothing else changes."},
+        ],
+        code:`<span class="comment">// PlayerAbility.cs — the base class all abilities inherit from</span>
+
+<span class="kw">public abstract class</span> <span class="type">PlayerAbility</span> : MonoBehaviour
+{
+    [SerializeField] <span class="kw">protected float</span> cooldown = <span class="val">3f</span>;
+    [SerializeField] <span class="kw">protected float</span> duration = <span class="val">2f</span>;
+    <span class="kw">protected bool</span> isReady = <span class="kw">true</span>;
+
+    <span class="kw">public abstract void</span> Activate();       <span class="comment">// each ability implements this</span>
+    <span class="kw">public virtual void</span> Deactivate() {}    <span class="comment">// optional override</span>
+
+    <span class="kw">protected</span> <span class="type">IEnumerator</span> CooldownRoutine()
+    {
+        isReady = <span class="kw">false</span>;
+        <span class="kw">yield return new</span> WaitForSeconds(duration);
+        Deactivate();
+        <span class="kw">yield return new</span> WaitForSeconds(cooldown - duration);
+        isReady = <span class="kw">true</span>;
+    }
+}
+
+<span class="comment">// SpiritSightAbility.cs — inherits from PlayerAbility</span>
+<span class="kw">public class</span> <span class="type">SpiritSightAbility</span> : <span class="type">PlayerAbility</span>
+{
+    [SerializeField] <span class="type">Material</span> spiritSightMaterial;   <span class="comment">// outline shader</span>
+    [SerializeField] <span class="type">LayerMask</span> enemyLayer;
+
+    <span class="kw">public override void</span> Activate()
+    {
+        <span class="kw">if</span> (!isReady) <span class="kw">return</span>;
+        <span class="comment">// Find all enemies, enable their outline renderer</span>
+        <span class="kw">var</span> enemies = FindObjectsOfType<<span class="type">SoldierAI</span>>();
+        <span class="kw">foreach</span> (<span class="kw">var</span> e <span class="kw">in</span> enemies)
+            e.GetComponent<<span class="type">SpriteRenderer</span>>().material = spiritSightMaterial;
+        StartCoroutine(CooldownRoutine());
+    }
+
+    <span class="kw">public override void</span> Deactivate()
+    {
+        <span class="comment">// Reset materials back to default</span>
+        <span class="kw">var</span> enemies = FindObjectsOfType<<span class="type">SoldierAI</span>>();
+        <span class="kw">foreach</span> (<span class="kw">var</span> e <span class="kw">in</span> enemies)
+            e.GetComponent<<span class="type">SpriteRenderer</span>>().material = <span class="kw">null</span>;
+    }
+}
+<span class="comment">// Adding Shadow Decoy: create ShadowDecoyAbility.cs, inherit PlayerAbility</span>
+<span class="comment">// Adding Nature Summon: create NatureSummonAbility.cs, inherit PlayerAbility</span>
+<span class="comment">// PlayerController never changes — abilities are plug-in components</span>`
+      }
+    ]
+  },
+  {
+    label:"Phase 4 — Professional",
+    intro:"The game works. Now build it the way a studio would: an event system for decoupled communication, a proper save system, object pooling for performance, and a Game Manager that controls state.",
+    color:"#3C3489",textColor:"#EEEDFE",numBg:"#EEEDFE",numColor:"#3C3489",
+    mechs:[
+      {
+        name:"4.1 — Event system (decoupled architecture)",
+        tags:[{t:"Architecture",c:"#EEEDFE/#3C3489"},{t:"Professional",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"The problem with direct references",body:"When PlayerCombat.cs calls UIManager.Instance.UpdateHealth(), your player code now depends on your UI code. Change the UI, break the player. In professional games, systems communicate through events — the player broadcasts 'I took damage', and anything that cares (UI, audio, camera shake, game over logic) responds independently. Use C# events or ScriptableObject-based events."},
+        ],
+        code:`<span class="comment">// GameEvents.cs — a static class of C# events (simple approach)</span>
+
+<span class="kw">public static class</span> <span class="type">GameEvents</span>
+{
+    <span class="comment">// Player events</span>
+    <span class="kw">public static event</span> System.Action<<span class="kw">int</span>> OnPlayerHealthChanged;
+    <span class="kw">public static event</span> System.Action OnPlayerDied;
+    <span class="kw">public static event</span> System.Action<<span class="kw">int</span>> OnEnemyKilled;
+    <span class="kw">public static event</span> System.Action OnLevelCompleted;
+    <span class="kw">public static event</span> System.Action<<span class="kw">string</span>> OnAbilityActivated;
+
+    <span class="comment">// Raise events — call these from anywhere</span>
+    <span class="kw">public static void</span> PlayerHealthChanged(<span class="kw">int</span> newHealth)
+        => OnPlayerHealthChanged?.Invoke(newHealth);
+
+    <span class="kw">public static void</span> PlayerDied()
+        => OnPlayerDied?.Invoke();
+}
+
+<span class="comment">// In PlayerHealth.cs — raise the event, know nothing about UI</span>
+<span class="kw">public void</span> TakeDamage(<span class="kw">int</span> damage)
+{
+    currentHealth -= damage;
+    <span class="type">GameEvents</span>.PlayerHealthChanged(currentHealth); <span class="comment">// broadcast</span>
+    <span class="kw">if</span> (currentHealth <= <span class="val">0</span>) <span class="type">GameEvents</span>.PlayerDied();
+}
+
+<span class="comment">// In UIManager.cs — respond to event, know nothing about player</span>
+<span class="kw">void</span> OnEnable()
+    => <span class="type">GameEvents</span>.OnPlayerHealthChanged += UpdateHealthBar;
+
+<span class="kw">void</span> OnDisable()
+    => <span class="type">GameEvents</span>.OnPlayerHealthChanged -= UpdateHealthBar;  <span class="comment">← ALWAYS unsubscribe</span>
+
+<span class="kw">void</span> UpdateHealthBar(<span class="kw">int</span> health) => healthSlider.value = health;
+
+<span class="comment">// AudioManager, CameraShake, GameOverScreen all listen to the same events</span>
+<span class="comment">// Change any one system — nothing else breaks</span>`,
+        warn:{label:"Always unsubscribe in OnDisable",text:"If you subscribe to an event in OnEnable but forget to unsubscribe in OnDisable, destroyed GameObjects leave dangling references that cause null reference exceptions and memory leaks. This is one of the most common professional Unity bugs. Make unsubscription a habit — write it immediately after every subscription."}
+      },
+      {
+        name:"4.2 — Object pooling for enemies and projectiles",
+        tags:[{t:"Performance",c:"#FAEEDA/#633806"},{t:"Mobile",c:"#E1F5EE/#085041"}],
+        sections:[
+          {title:"Why pooling matters on mobile",body:"Instantiate() and Destroy() are expensive — they allocate and deallocate memory. On Android, frequent allocation triggers the garbage collector, causing frame rate hitches at the worst moment (mid-combat). Object pooling reuses GameObjects: deactivate instead of destroy, activate instead of instantiate."},
+        ],
+        code:`<span class="comment">// ObjectPool.cs — generic pool, reusable for any prefab</span>
+
+<span class="kw">using</span> System.Collections.Generic;
+
+<span class="kw">public class</span> <span class="type">ObjectPool</span> : MonoBehaviour
+{
+    <span class="kw">public static</span> <span class="type">ObjectPool</span> Instance;
+    [SerializeField] <span class="type">GameObject</span> prefab;
+    [SerializeField] <span class="kw">int</span> poolSize = <span class="val">20</span>;
+
+    Queue<<span class="type">GameObject</span>> pool = <span class="kw">new</span> Queue<<span class="type">GameObject</span>>();
+
+    <span class="kw">void</span> Awake()
+    {
+        Instance = <span class="kw">this</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> i = <span class="val">0</span>; i < poolSize; i++)
+        {
+            <span class="kw">var</span> obj = Instantiate(prefab, transform);
+            obj.SetActive(<span class="kw">false</span>);
+            pool.Enqueue(obj);
+        }
+    }
+
+    <span class="comment">// Get a pooled object — use instead of Instantiate()</span>
+    <span class="kw">public</span> <span class="type">GameObject</span> Get(<span class="type">Vector3</span> position, <span class="type">Quaternion</span> rotation)
+    {
+        <span class="kw">if</span> (pool.Count == <span class="val">0</span>) Expand();
+        <span class="kw">var</span> obj = pool.Dequeue();
+        obj.transform.SetPositionAndRotation(position, rotation);
+        obj.SetActive(<span class="kw">true</span>);
+        <span class="kw">return</span> obj;
+    }
+
+    <span class="comment">// Return a pooled object — use instead of Destroy()</span>
+    <span class="kw">public void</span> Return(<span class="type">GameObject</span> obj)
+    {
+        obj.SetActive(<span class="kw">false</span>);
+        pool.Enqueue(obj);
+    }
+
+    <span class="kw">void</span> Expand()
+    {
+        <span class="kw">var</span> obj = Instantiate(prefab, transform);
+        obj.SetActive(<span class="kw">false</span>);
+        pool.Enqueue(obj);
+    }
+}
+
+<span class="comment">// Usage — in EnemySpawner.cs:</span>
+<span class="comment">// var soldier = ObjectPool.Instance.Get(spawnPoint.position, Quaternion.identity);</span>
+<span class="comment">// When enemy dies: ObjectPool.Instance.Return(gameObject);</span>`,
+        good:{label:"Unity 2021+ has a built-in pool",text:"UnityEngine.Pool.ObjectPool<T> is Unity's native implementation, available from 2021+. For your 2022 LTS project, prefer Unity's version for better memory management. The pattern above teaches the concept — production code should use UnityEngine.Pool."}
+      },
+      {
+        name:"4.3 — Save system and checkpoints",
+        tags:[{t:"Save/Load",c:"#EEEDFE/#3C3489"},{t:"PlayerPrefs",c:"#FAEEDA/#633806"}],
+        sections:[
+          {title:"What to save and what not to",body:"Save: current level, checkpoint position, player health, abilities unlocked, moral choices made. Don't save: enemy positions, temporary physics states, UI state. The save happens at checkpoints, not continuously — continuous saving on mobile causes micro-hitches."},
+        ],
+        code:`<span class="comment">// SaveSystem.cs — JSON-based save on top of PlayerPrefs</span>
+
+[System.Serializable]
+<span class="kw">public class</span> <span class="type">SaveData</span>
+{
+    <span class="kw">public int</span> currentLevel;
+    <span class="kw">public float</span> checkpointX, checkpointY;
+    <span class="kw">public int</span> playerHealth;
+    <span class="kw">public bool</span>[] abilitiesUnlocked = <span class="kw">new bool</span>[<span class="val">4</span>];
+    <span class="kw">public int</span> morality;          <span class="comment">// tracks level 11-17 choices</span>
+    <span class="kw">public int</span> alliesGathered;    <span class="comment">// tracks which communities joined</span>
+}
+
+<span class="kw">public static class</span> <span class="type">SaveSystem</span>
+{
+    <span class="kw">const string</span> KEY = <span class="str">"FreedomsWrath_Save"</span>;
+
+    <span class="kw">public static void</span> Save(<span class="type">SaveData</span> data)
+    {
+        <span class="kw">string</span> json = JsonUtility.ToJson(data);
+        PlayerPrefs.SetString(KEY, json);
+        PlayerPrefs.Save();
+    }
+
+    <span class="kw">public static</span> <span class="type">SaveData</span> Load()
+    {
+        <span class="kw">if</span> (!PlayerPrefs.HasKey(KEY))
+            <span class="kw">return new</span> <span class="type">SaveData</span>(); <span class="comment">// first run — default values</span>
+        <span class="kw">return</span> JsonUtility.FromJson<<span class="type">SaveData</span>>(PlayerPrefs.GetString(KEY));
+    }
+
+    <span class="kw">public static bool</span> HasSave() => PlayerPrefs.HasKey(KEY);
+    <span class="kw">public static void</span> Delete() => PlayerPrefs.DeleteKey(KEY);
+}
+
+<span class="comment">// Checkpoint.cs — place on checkpoint trigger colliders in each level</span>
+<span class="kw">public class</span> <span class="type">Checkpoint</span> : MonoBehaviour
+{
+    <span class="kw">bool</span> activated;
+
+    <span class="kw">void</span> OnTriggerEnter2D(<span class="type">Collider2D</span> other)
+    {
+        <span class="kw">if</span> (activated || !other.CompareTag(<span class="str">"Player"</span>)) <span class="kw">return</span>;
+        activated = <span class="kw">true</span>;
+
+        <span class="kw">var</span> data = <span class="kw">new</span> <span class="type">SaveData</span>
+        {
+            currentLevel = <span class="type">SceneManager</span>.GetActiveScene().buildIndex,
+            checkpointX = transform.position.x,
+            checkpointY = transform.position.y,
+            playerHealth = <span class="type">GameManager</span>.Instance.PlayerHealth
+        };
+        <span class="type">SaveSystem</span>.Save(data);
+        <span class="type">GameEvents</span>.CheckpointReached();  <span class="comment">// UI feedback, sound, etc.</span>
+    }
+}`
+      }
+    ]
+  }
+];
+
+let openCards = new Set();
+
+function showPhase(idx, btn){
+  document.querySelectorAll('.ph-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  openCards.clear();
+  render(idx);
+}
+
+function toggleCard(id){
+  if(openCards.has(id)) openCards.delete(id);
+  else openCards.add(id);
+  render(currentPhase);
+}
+
+let currentPhase=0;
+
+function render(phaseIdx){
+  currentPhase=phaseIdx;
+  const ph=PHASES[phaseIdx];
+  let html=`<div class="phase-intro" style="border-left:3px solid ${ph.color};border-radius:0 var(--border-radius-lg) var(--border-radius-lg) 0">
+    <div class="pi-title" style="color:${ph.color}">${ph.label}</div>
+    <div class="pi-body">${ph.intro}</div>
+  </div><div class="mech-list">`;
+  ph.mechs.forEach((m,i)=>{
+    const id=`${phaseIdx}-${i}`;
+    const open=openCards.has(id);
+    const tags=m.tags.map(t=>{const[bg,col]=t.c.split('/');return `<span class="mtag" style="background:${bg};color:${col}">${t.t}</span>`;}).join('');
+    let body='';
+    if(m.sections) m.sections.forEach(s=>{
+      body+=`<div class="sec-title">${s.title}</div><div class="sec-body">${s.body}</div>`;
+    });
+    if(m.code) body+=`<div class="code-block">${m.code}</div>`;
+    if(m.insight) body+=`<div class="insight"><div class="insight-lbl">${m.insight.label}</div>${m.insight.text}</div>`;
+    if(m.warn) body+=`<div class="warn"><div class="warn-lbl">${m.warn.label}</div>${m.warn.text}</div>`;
+    if(m.good) body+=`<div class="good"><div class="good-lbl">${m.good.label}</div>${m.good.text}</div>`;
+    html+=`<div class="mech-card">
+      <div class="mech-head" onclick="toggleCard('${id}')">
+        <div class="mech-num" style="background:${ph.numBg};color:${ph.numColor}">${phaseIdx+1}.${i+1}</div>
+        <div class="mech-info">
+          <div class="mech-name">${m.name}</div>
+          <div class="mech-tag-row">${tags}</div>
+        </div>
+        <span class="chevron ${open?'open':''}">&#9654;</span>
+      </div>
+      <div class="mech-body ${open?'open':''}">${body}</div>
+    </div>`;
+  });
+  html+='</div>';
+  document.getElementById('phase-container').innerHTML=html;
+}
+
+render(0);
+</script>

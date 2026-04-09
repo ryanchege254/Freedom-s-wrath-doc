@@ -1,0 +1,388 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.root{padding:1rem 0;font-family:var(--font-sans)}
+.stepper{display:flex;gap:0;margin-bottom:1.5rem;align-items:center}
+.step-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;cursor:pointer;flex-shrink:0;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-tertiary);transition:all .15s}
+.step-dot.active{background:#534AB7;color:#EEEDFE;border-color:#534AB7}
+.step-dot.done{background:#E1F5EE;color:#085041;border-color:#0F6E56}
+.step-line{flex:1;height:0.5px;background:var(--color-border-tertiary)}
+.step-line.done{background:#0F6E56}
+.panel{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:1rem;background:var(--color-background-primary)}
+.panel-title{font-size:16px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.panel-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem;line-height:1.6}
+.code-block{font-family:var(--font-mono);font-size:12px;background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-md);line-height:1.8;margin-bottom:12px;overflow-x:auto}
+.code-block .cmd{color:#3C3489}
+.code-block .comment{color:var(--color-text-tertiary)}
+.code-block .val{color:#085041}
+.code-block .warn{color:#854F0B}
+.why-box{background:#EEEDFE;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:12px}
+.why-label{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:#534AB7;margin-bottom:3px}
+.why-text{font-size:12px;color:#3C3489;line-height:1.5}
+.warn-box{background:#FAEEDA;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:12px}
+.warn-label{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:#854F0B;margin-bottom:3px}
+.warn-text{font-size:12px;color:#633806;line-height:1.5}
+.good-box{background:#E1F5EE;border-radius:var(--border-radius-md);padding:10px 12px;margin-bottom:12px}
+.good-label{font-size:10px;font-weight:500;letter-spacing:0.07em;text-transform:uppercase;color:#0F6E56;margin-bottom:3px}
+.good-text{font-size:12px;color:#085041;line-height:1.5}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.mini-card{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:10px}
+.mini-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.mini-body{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:1rem}
+.step-label{font-size:11px;color:var(--color-text-tertiary)}
+.branch-visual{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:14px;margin-bottom:12px;overflow-x:auto}
+.branch-track{display:flex;align-items:center;gap:0;margin-bottom:8px}
+.branch-name{font-size:11px;font-weight:500;min-width:100px;color:var(--color-text-secondary)}
+.branch-line{height:3px;border-radius:2px;flex:1}
+.branch-node{width:12px;height:12px;border-radius:50%;flex-shrink:0;border:2px solid var(--color-background-secondary)}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin-right:4px;margin-bottom:4px}
+.b-purple{background:#EEEDFE;color:#3C3489}
+.b-teal{background:#E1F5EE;color:#085041}
+.b-coral{background:#FAECE7;color:#993C1D}
+.b-amber{background:#FAEEDA;color:#633806}
+.b-gray{background:#F1EFE8;color:#444441}
+</style>
+
+<div class="root">
+<h2 class="sr-only">Git team workflow tutorial for Freedom's Wrath — 7 steps covering repo setup, Git LFS, branch strategy, .gitignore, conflict prevention, pull request process, and daily workflow</h2>
+
+<div class="stepper" id="stepper"></div>
+
+<div id="panel-content"></div>
+
+<div class="nav-row">
+  <button onclick="prevStep()" id="prev-btn" style="padding:7px 16px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary)">Back</button>
+  <span class="step-label" id="step-counter"></span>
+  <button onclick="nextStep()" id="next-btn" style="padding:7px 16px;border:0.5px solid #534AB7;border-radius:var(--border-radius-md);font-size:13px;cursor:pointer;background:#534AB7;color:#EEEDFE">Next</button>
+</div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    title:"Step 1 — Create the repo with Git LFS from day one",
+    sub:"This is the most critical setup step for a Unity project with designers. Without Git LFS, binary art files bloat the repo to gigabytes and break every team member's clone.",
+    content:`
+<div class="warn-box"><div class="warn-label">Why LFS matters for your team</div><div class="warn-text">Regular Git stores the full history of every file. A 2MB sprite edited 50 times = 100MB in your repo history. With 3 designers committing daily, you'll hit GitHub's 1GB repo limit within weeks. LFS stores binaries externally and only keeps lightweight pointers in Git.</div></div>
+<div class="code-block">
+<span class="comment"># 1. Create the repo on GitHub first, then clone it locally</span><br>
+<span class="cmd">git clone</span> <span class="val">https://github.com/your-org/freedoms-wrath.git</span><br>
+<span class="cmd">cd</span> freedoms-wrath<br><br>
+<span class="comment"># 2. Install Git LFS (one-time, per machine)</span><br>
+<span class="cmd">git lfs install</span><br><br>
+<span class="comment"># 3. Track ALL binary asset types designers will create</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.png"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.psd"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.aseprite"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.wav"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.mp3"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.anim"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.unity"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.prefab"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.fbx"</span><br>
+<span class="cmd">git lfs track</span> <span class="val">"*.controller"</span><br><br>
+<span class="comment"># 4. Commit the generated .gitattributes file immediately</span><br>
+<span class="cmd">git add</span> .gitattributes<br>
+<span class="cmd">git commit</span> <span class="val">-m "chore: configure Git LFS for all Unity binary assets"</span><br>
+<span class="cmd">git push</span>
+</div>
+<div class="good-box"><div class="good-label">Every team member must run this after cloning</div><div class="good-text">git lfs install — runs once per machine. Without it, LFS files download as tiny pointer text files instead of the real assets. This confuses designers badly. Add it to your team onboarding checklist.</div></div>
+`
+  },
+  {
+    title:"Step 2 — Create the .gitignore for Unity",
+    sub:"Unity generates hundreds of temporary files every time the editor runs. Without a proper .gitignore, designers will accidentally commit cache files that cause constant merge conflicts.",
+    content:`
+<div class="warn-box"><div class="warn-label">The most common Unity team conflict cause</div><div class="warn-text">The Library/ folder is auto-generated by Unity for each machine. If two people commit it, every single pull causes a conflict. The .meta file system is how Unity tracks asset GUIDs — these must be committed but never hand-edited.</div></div>
+<div class="code-block">
+<span class="comment"># Create .gitignore at the project root (outside Assets/)</span><br><br>
+<span class="comment"># ===== UNITY GENERATED — NEVER COMMIT =====</span><br>
+<span class="warn">/[Ll]ibrary/</span><br>
+<span class="warn">/[Tt]emp/</span><br>
+<span class="warn">/[Oo]bj/</span><br>
+<span class="warn">/[Bb]uild/</span><br>
+<span class="warn">/[Bb]uilds/</span><br>
+<span class="warn">/[Ll]ogs/</span><br>
+<span class="warn">/[Uu]ser[Ss]ettings/</span><br>
+<span class="warn">*.csproj</span><br>
+<span class="warn">*.unityproj</span><br>
+<span class="warn">*.sln</span><br>
+<span class="warn">*.pidb</span><br>
+<span class="warn">*.suo</span><br>
+<span class="warn">*.tmp</span><br>
+<span class="warn">*.booproj</span><br><br>
+<span class="comment"># ===== OS FILES — NEVER COMMIT =====</span><br>
+<span class="warn">.DS_Store</span><br>
+<span class="warn">Thumbs.db</span><br>
+<span class="warn">Desktop.ini</span><br><br>
+<span class="comment"># ===== IDE FILES =====</span><br>
+<span class="warn">.idea/</span><br>
+<span class="warn">.vscode/</span><br>
+<span class="warn">*.userprefs</span><br><br>
+<span class="comment"># ===== ALWAYS COMMIT (critical for Unity) =====</span><br>
+<span class="val"># Assets/**/*.meta  ← commit ALL .meta files</span><br>
+<span class="val"># ProjectSettings/  ← commit this entire folder</span><br>
+<span class="val"># Packages/         ← commit this entire folder</span>
+</div>
+<div class="why-box"><div class="why-label">The .meta file rule</div><div class="why-text">Every asset Unity imports gets a .meta file with a unique GUID. If a designer deletes a .meta file or forgets to commit it, Unity loses the reference to that asset in every scene and prefab that uses it — causing broken links across the entire project. Always commit .meta files alongside their parent asset.</div></div>
+`
+  },
+  {
+    title:"Step 3 — Set up the branch strategy",
+    sub:"Three branches, two rules. This is the entire strategy. Complexity beyond this for a 5-person team creates overhead with no benefit.",
+    content:`
+<div class="branch-visual">
+  <div class="branch-track">
+    <div class="branch-name" style="color:#085041;font-weight:500">main</div>
+    <div class="branch-node" style="background:#0F6E56"></div>
+    <div class="branch-line" style="background:#0F6E56"></div>
+    <div class="branch-node" style="background:#0F6E56"></div>
+    <div class="branch-line" style="background:#0F6E56"></div>
+    <div class="branch-node" style="background:#0F6E56"></div>
+    <div class="branch-line" style="background:#0F6E56"></div>
+    <div class="branch-node" style="background:#0F6E56"></div>
+    <span style="font-size:11px;color:#085041;padding-left:8px">— always playable</span>
+  </div>
+  <div class="branch-track">
+    <div class="branch-name" style="color:#3C3489;font-weight:500">dev</div>
+    <div class="branch-node" style="background:#534AB7"></div>
+    <div class="branch-line" style="background:#534AB7"></div>
+    <div class="branch-node" style="background:#534AB7"></div>
+    <div class="branch-line" style="background:#534AB7;flex:0.5"></div>
+    <div class="branch-node" style="background:#534AB7"></div>
+    <div class="branch-line" style="background:#534AB7"></div>
+    <div class="branch-node" style="background:#534AB7"></div>
+    <div class="branch-line" style="background:#534AB7;flex:0.5"></div>
+    <div class="branch-node" style="background:#534AB7"></div>
+    <span style="font-size:11px;color:#534AB7;padding-left:8px">— Friday build cuts from here</span>
+  </div>
+  <div class="branch-track">
+    <div class="branch-name" style="color:#993C1D;font-weight:500">feature/*</div>
+    <div class="branch-node" style="background:#D85A30;opacity:.3"></div>
+    <div class="branch-line" style="background:#D85A30;flex:0.3"></div>
+    <div class="branch-node" style="background:#D85A30"></div>
+    <div class="branch-line" style="background:#D85A30;flex:0.4"></div>
+    <div class="branch-node" style="background:#D85A30"></div>
+    <div class="branch-line" style="background:#D85A30;flex:0.3;opacity:.2"></div>
+    <div class="branch-node" style="background:#D85A30;opacity:.2"></div>
+    <div class="branch-line" style="background:#D85A30;opacity:.1"></div>
+    <div class="branch-node" style="background:#D85A30;opacity:.1"></div>
+    <span style="font-size:11px;color:#993C1D;padding-left:8px">— one per feature, short-lived</span>
+  </div>
+</div>
+<div class="code-block">
+<span class="comment"># Create dev branch from main (you do this once)</span><br>
+<span class="cmd">git checkout</span> <span class="val">-b dev</span><br>
+<span class="cmd">git push</span> <span class="val">-u origin dev</span><br><br>
+<span class="comment"># Protect main on GitHub: Settings → Branches → Add rule</span><br>
+<span class="comment"># Rule: require pull request + 1 approval before merging to main</span><br>
+<span class="comment"># Rule: require dev branch to be up to date before merge</span><br><br>
+<span class="comment"># ---- How each person starts new work ----</span><br>
+<span class="comment"># Dev: starting the shadow mechanic</span><br>
+<span class="cmd">git checkout</span> dev<br>
+<span class="cmd">git pull</span> origin dev<br>
+<span class="cmd">git checkout</span> <span class="val">-b feature/shadow-mechanic</span><br><br>
+<span class="comment"># Designer: adding Level 1 tileset</span><br>
+<span class="cmd">git checkout</span> dev<br>
+<span class="cmd">git pull</span> origin dev<span class="comment">  ← always pull dev first</span><br>
+<span class="cmd">git checkout</span> <span class="val">-b feature/level-01-tileset</span><br>
+</div>
+<div class="two-col">
+  <div class="mini-card">
+    <div class="mini-title">Rule 1</div>
+    <div class="mini-body">Nobody commits directly to main or dev. Ever. Every change goes through a feature branch. This applies to you too as lead — no exceptions or the rule collapses.</div>
+  </div>
+  <div class="mini-card">
+    <div class="mini-title">Rule 2</div>
+    <div class="mini-body">Feature branches are short — maximum one sprint (2 weeks). Long-lived branches accumulate changes that are painful to merge. If a feature takes longer, merge partial progress to dev and continue on a new branch.</div>
+  </div>
+</div>
+`
+  },
+  {
+    title:"Step 4 — Separate designer and developer workflows",
+    sub:"The single biggest source of cross-team conflicts is designers and developers touching the same files. This step makes that structurally impossible.",
+    content:`
+<div class="why-box"><div class="why-label">The core principle</div><div class="why-text">Designers never edit code. Developers never edit raw art files. The only files both teams touch are .meta files and .unity scene files — and there are strict rules for those.</div></div>
+
+<div class="two-col">
+  <div class="mini-card" style="border-left:3px solid #534AB7;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0">
+    <div class="mini-title" style="color:#3C3489">Dev team commits</div>
+    <div class="mini-body">Assets/_Project/Scripts/**<br>Assets/_Project/Scenes/** (only as lead)<br>Assets/_Project/Prefabs/**<br>Assets/_Project/ScriptableObjects/**<br>ProjectSettings/**<br>Packages/**</div>
+  </div>
+  <div class="mini-card" style="border-left:3px solid #0F6E56;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0">
+    <div class="mini-title" style="color:#085041">Design team commits</div>
+    <div class="mini-body">Assets/_Project/Art/**<br>Assets/_Project/Audio/**<br>Assets/_Project/Animations/**<br>Assets/_Project/Art/**/*.meta<br>Assets/_Project/Audio/**/*.meta</div>
+  </div>
+</div>
+
+<div class="warn-box"><div class="warn-label">The .unity scene file problem — biggest conflict risk</div><div class="warn-text">.unity scene files are YAML and merge poorly. If a designer drops a sprite into a scene at the same time a dev adds a spawn point, both pull changes and get a conflict that's nearly impossible to resolve without losing work. The fix: only ONE person owns scene editing at a time.</div></div>
+
+<div class="code-block">
+<span class="comment"># Scene ownership rule: post in Discord before editing a scene</span><br>
+<span class="comment"># "Editing Level01.unity — nobody touch until I push"</span><br><br>
+<span class="comment"># Enable Unity's YAML merge tool to make conflicts easier IF they happen</span><br>
+<span class="comment"># Add to .gitattributes (alongside LFS rules):</span><br><br>
+<span class="val">*.unity merge=unityyamlmerge eol=lf</span><br>
+<span class="val">*.prefab merge=unityyamlmerge eol=lf</span><br>
+<span class="val">*.asset merge=unityyamlmerge eol=lf</span><br>
+<span class="val">*.mat merge=unityyamlmerge eol=lf</span><br><br>
+<span class="comment"># Then in .git/config (each machine), add:</span><br>
+<span class="val">[merge "unityyamlmerge"]</span><br>
+<span class="val">  name = Unity SmartMerge</span><br>
+<span class="val">  driver = 'C:/Program Files/Unity/Hub/Editor/2022.x/Editor/Data/Tools/UnityYAMLMerge.exe'</span><br>
+<span class="val">  recursive = binary</span>
+</div>
+<div class="good-box"><div class="good-label">Designers on GitHub Desktop</div><div class="good-text">Don't force designers to use the command line. GitHub Desktop gives them a visual interface for pull, branch, commit, and push. Set up their accounts, show them GitHub Desktop once, and document the three actions they need: pull before starting, commit with a clear message, push when done. That's the entire designer Git workflow.</div></div>
+`
+  },
+  {
+    title:"Step 5 — Commit message conventions",
+    sub:"Small teams skip this and pay for it in month 3 when nobody can read the commit history. Five minutes of convention saves hours of archaeology.",
+    content:`
+<div class="code-block">
+<span class="comment"># Format: type(scope): short description</span><br><br>
+<span class="comment"># Types:</span><br>
+<span class="val">feat</span>     <span class="comment">→ new feature or mechanic</span><br>
+<span class="val">fix</span>      <span class="comment">→ bug fix</span><br>
+<span class="val">art</span>      <span class="comment">→ new or updated art asset (designer commits)</span><br>
+<span class="val">audio</span>    <span class="comment">→ sound effect or music file</span><br>
+<span class="val">refactor</span> <span class="comment">→ code cleanup, no behaviour change</span><br>
+<span class="val">chore</span>    <span class="comment">→ build, config, tooling</span><br>
+<span class="val">level</span>    <span class="comment">→ scene layout or level design change</span><br><br>
+<span class="comment"># Good examples from your team:</span><br>
+<span class="val">feat(player): add wall-jump with coyote time buffer</span><br>
+<span class="val">art(amari): add idle and run animation sprites level-1</span><br>
+<span class="val">fix(enemy): soldiers no longer clip through level-01 walls</span><br>
+<span class="val">audio(combat): add machete swing and spear throw SFX</span><br>
+<span class="val">level(01): place spawn triggers and checkpoint objects</span><br>
+<span class="val">feat(ability): implement spirit sight with 3s cooldown</span><br>
+<span class="val">art(tileset): deliver nandi-hills ground and platform tiles</span><br>
+<span class="val">chore: update .gitattributes to track .controller files in LFS</span><br><br>
+<span class="comment"># Bad examples — tells you nothing:</span><br>
+<span class="warn">fixed stuff</span><br>
+<span class="warn">update</span><br>
+<span class="warn">changes</span><br>
+<span class="warn">final</span><br>
+<span class="warn">final2</span>
+</div>
+<div class="why-box"><div class="why-label">Why this matters for your specific team</div><div class="why-text">When you're debugging a build on Friday and need to find "when did the player start clipping through platforms", searchable commit types let you filter instantly: git log --oneline --grep="fix(player)" — gives you every player bug fix in chronological order. Without convention, you're reading 200 commits that all say "update".</div></div>
+<div class="code-block">
+<span class="comment"># Useful git log commands for debugging</span><br>
+<span class="cmd">git log</span> <span class="val">--oneline --grep="fix"</span>           <span class="comment">← all bug fixes</span><br>
+<span class="cmd">git log</span> <span class="val">--oneline --author="D1-name"</span>    <span class="comment">← one person's commits</span><br>
+<span class="cmd">git log</span> <span class="val">--oneline Assets/_Project/Art/</span>   <span class="comment">← all art changes</span><br>
+<span class="cmd">git diff</span> <span class="val">dev..feature/shadow-mechanic</span>    <span class="comment">← what's new in a branch</span>
+</div>
+`
+  },
+  {
+    title:"Step 6 — The pull request process",
+    sub:"Pull requests are the gate between feature work and the shared dev branch. They prevent broken code from landing and create a paper trail of every decision.",
+    content:`
+<div class="code-block">
+<span class="comment"># When work on a feature branch is done:</span><br><br>
+<span class="comment"># 1. Pull the latest dev branch into your feature branch first</span><br>
+<span class="cmd">git checkout</span> feature/shadow-mechanic<br>
+<span class="cmd">git pull origin</span> dev<br>
+<span class="comment"># Resolve any conflicts here, in your branch, not in dev</span><br><br>
+<span class="comment"># 2. Push your feature branch</span><br>
+<span class="cmd">git push origin</span> feature/shadow-mechanic<br><br>
+<span class="comment"># 3. Open a PR on GitHub: feature/shadow-mechanic → dev</span><br>
+<span class="comment"># PR title must match commit convention: feat(ability): shadow mechanic</span><br>
+<span class="comment"># PR description must answer these three questions:</span><br>
+<span class="val">What does this add or fix?</span><br>
+<span class="val">How was it tested? (describe, don't write code)</span><br>
+<span class="val">Any known issues or follow-ups?</span>
+</div>
+
+<div class="two-col">
+  <div class="mini-card">
+    <div class="mini-title">Dev PRs</div>
+    <div class="mini-body">Reviewed by you before merge. You check: does it build? Does it match the mechanic spec? No regressions? Merge with "Squash and merge" to keep dev history clean — one commit per feature, not 40 "wip" commits.</div>
+  </div>
+  <div class="mini-card">
+    <div class="mini-title">Designer PRs</div>
+    <div class="mini-body">Reviewed by Dev 2 for format/naming compliance, then D1 (Lead Artist) for visual quality. Designer PRs are usually clean — binary files don't conflict if the folder structure rules are followed. Merge with standard "Merge commit".</div>
+  </div>
+</div>
+
+<div class="warn-box"><div class="warn-label">Merging dev → main (milestone only)</div><div class="warn-text">Only you merge dev into main. Only at milestone completions, not at the end of every sprint. Main is the "this is our best stable build" branch — not a daily snapshot. Dev is what gets built every Friday.</div></div>
+<div class="code-block">
+<span class="comment"># Merge dev → main at milestone (you only)</span><br>
+<span class="cmd">git checkout</span> main<br>
+<span class="cmd">git pull</span> origin main<br>
+<span class="cmd">git merge</span> <span class="val">--no-ff dev</span> <span class="val">-m "milestone: prototype complete — level 01 playable"</span><br>
+<span class="cmd">git tag</span> <span class="val">-a v0.1.0 -m "Prototype milestone"</span><br>
+<span class="cmd">git push</span> origin main --tags
+</div>
+`
+  },
+  {
+    title:"Step 7 — Daily team workflow (the routine everyone follows)",
+    sub:"The best git strategy fails if people don't follow it daily. This is the exact routine to run every morning and evening — paste this into your team onboarding doc.",
+    content:`
+<div class="code-block">
+<span class="comment"># ===== EVERY MORNING BEFORE STARTING WORK =====</span><br><br>
+<span class="cmd">git checkout</span> dev<br>
+<span class="cmd">git pull</span> origin dev         <span class="comment">← always start fresh from dev</span><br>
+<span class="cmd">git checkout</span> feature/your-branch<br>
+<span class="cmd">git merge</span> dev               <span class="comment">← bring latest dev changes into your branch</span><br>
+<span class="comment"># Resolve conflicts if any — small conflicts now, not giant ones on Friday</span><br><br>
+<span class="comment"># ===== END OF DAY / WHEN WORK IS DONE =====</span><br><br>
+<span class="cmd">git add</span> <span class="val">-p</span>                  <span class="comment">← stage changes interactively (review each change)</span><br>
+<span class="cmd">git commit</span> <span class="val">-m "art(amari): complete attack animation frame set"</span><br>
+<span class="cmd">git push</span> origin feature/your-branch<br><br>
+<span class="comment"># ===== IF YOU'RE ABOUT TO EDIT A SCENE FILE =====</span><br><br>
+<span class="comment"># 1. Post in #dev-log Discord: "Editing Level01.unity now"</span><br>
+<span class="comment"># 2. Pull dev immediately before opening Unity</span><br>
+<span class="comment"># 3. Make your changes, save, commit, push in one session</span><br>
+<span class="comment"># 4. Post in #dev-log: "Level01.unity pushed — safe to pull"</span>
+</div>
+<div class="good-box"><div class="good-label">For designers on GitHub Desktop — the daily 3 clicks</div><div class="good-text">1. Open GitHub Desktop. Click "Fetch origin" (checks for updates). 2. If changes appear, click "Pull origin". 3. Do your work in Aseprite or your tool. When done: stage files, write a message starting with "art:" or "audio:", click Commit, click Push. That's it. Post in #art-wip that your assets are pushed.</div></div>
+<div class="warn-box"><div class="warn-label">Emergency: someone broke the dev branch</div><div class="warn-text">This happens. Don't panic. Post in #blockers immediately. You revert the bad commit: git revert [bad-commit-hash] — this creates a new commit that undoes the damage without erasing history. Never use git reset --hard on a shared branch — it rewrites history and breaks everyone's local copies.</div></div>
+<div class="code-block">
+<span class="comment"># Revert a bad commit safely</span><br>
+<span class="cmd">git log</span> <span class="val">--oneline -10</span>        <span class="comment">← find the bad commit hash</span><br>
+<span class="cmd">git revert</span> <span class="val">abc1234</span>           <span class="comment">← creates a safe undo commit</span><br>
+<span class="cmd">git push</span> origin dev<br><br>
+<span class="comment"># Find who last edited a file (useful for conflict debugging)</span><br>
+<span class="cmd">git blame</span> <span class="val">Assets/_Project/Scripts/Player/PlayerController.cs</span>
+</div>
+`
+  }
+];
+
+let current = 0;
+
+function renderStepper(){
+  const s=document.getElementById('stepper');
+  s.innerHTML='';
+  STEPS.forEach((st,i)=>{
+    const cls = i<current?'done':i===current?'active':'';
+    s.innerHTML+=`<div class="step-dot ${cls}" onclick="goStep(${i})">${i<current?'&#10003;':i+1}</div>`;
+    if(i<STEPS.length-1) s.innerHTML+=`<div class="step-line ${i<current?'done':''}"></div>`;
+  });
+}
+
+function renderPanel(){
+  const st=STEPS[current];
+  document.getElementById('panel-content').innerHTML=`
+    <div class="panel">
+      <div class="panel-title">${st.title}</div>
+      <div class="panel-sub">${st.sub}</div>
+      ${st.content}
+    </div>`;
+  document.getElementById('step-counter').textContent=`Step ${current+1} of ${STEPS.length}`;
+  document.getElementById('prev-btn').style.opacity=current===0?'0.4':'1';
+  document.getElementById('prev-btn').disabled=current===0;
+  document.getElementById('next-btn').textContent=current===STEPS.length-1?'Done':'Next';
+}
+
+function goStep(i){current=i;renderStepper();renderPanel();}
+function nextStep(){if(current<STEPS.length-1){current++;renderStepper();renderPanel();}}
+function prevStep(){if(current>0){current--;renderStepper();renderPanel();}}
+
+renderStepper();renderPanel();
+</script>
